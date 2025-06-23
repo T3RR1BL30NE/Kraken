@@ -790,102 +790,31 @@ body {
 
 .welcome-avatar {
   flex-shrink: 0;
-}
-
-.kraken-avatar {
   width: 80px;
   height: 80px;
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.tentacle {
-  position: absolute;
-  width: 4px;
-  height: 30px;
-  background: var(--kraken-gradient);
-  border-radius: 2px;
-  transform-origin: bottom;
-}
-
-.tentacle.t1 {
-  top: -15px;
-  left: 10px;
-  transform: rotate(-30deg);
-  animation: tentacle-sway-1 3s ease-in-out infinite;
-}
-
-.tentacle.t2 {
-  top: -15px;
-  right: 10px;
-  transform: rotate(30deg);
-  animation: tentacle-sway-2 3s ease-in-out infinite;
-}
-
-.tentacle.t3 {
-  bottom: -15px;
-  left: 15px;
-  transform: rotate(150deg);
-  animation: tentacle-sway-3 3s ease-in-out infinite;
-}
-
-.tentacle.t4 {
-  bottom: -15px;
-  right: 15px;
-  transform: rotate(-150deg);
-  animation: tentacle-sway-4 3s ease-in-out infinite;
-}
-
-@keyframes tentacle-sway-1 {
-  0%, 100% { transform: rotate(-30deg); }
-  50% { transform: rotate(-45deg); }
-}
-
-@keyframes tentacle-sway-2 {
-  0%, 100% { transform: rotate(30deg); }
-  50% { transform: rotate(45deg); }
-}
-
-@keyframes tentacle-sway-3 {
-  0%, 100% { transform: rotate(150deg); }
-  50% { transform: rotate(135deg); }
-}
-
-@keyframes tentacle-sway-4 {
-  0%, 100% { transform: rotate(-150deg); }
-  50% { transform: rotate(-135deg); }
-}
-
-.kraken-head {
-  width: 50px;
-  height: 50px;
-  background: var(--kraken-gradient);
+.welcome-kraken-image {
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-kraken);
-  position: relative;
+  object-fit: cover;
+  filter: 
+    drop-shadow(0 0 15px rgba(74, 14, 78, 0.6))
+    brightness(1.1)
+    contrast(1.2);
+  transition: all 0.3s ease;
 }
 
-.kraken-eyes {
-  display: flex;
-  gap: 8px;
-}
-
-.eye {
-  width: 8px;
-  height: 8px;
-  background: white;
-  border-radius: 50%;
-  animation: blink 4s infinite;
-}
-
-@keyframes blink {
-  0%, 90%, 100% { transform: scaleY(1); }
-  95% { transform: scaleY(0.1); }
+.welcome-kraken-image:hover {
+  filter: 
+    drop-shadow(0 0 25px rgba(74, 14, 78, 0.8))
+    brightness(1.3)
+    contrast(1.4);
+  transform: scale(1.05);
 }
 
 .welcome-content h2 {
@@ -893,10 +822,11 @@ body {
   font-size: 28px;
   font-weight: 900;
   margin-bottom: var(--space-md);
-  background: var(--kraken-glow);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #4a0e4e;
+  text-shadow: 
+    0 0 10px rgba(74, 14, 78, 0.8),
+    0 0 20px rgba(74, 14, 78, 0.6),
+    0 0 30px rgba(74, 14, 78, 0.4);
   letter-spacing: 1px;
 }
 

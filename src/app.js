@@ -774,18 +774,7 @@ Ready to tackle complex programming challenges with AI-enhanced intelligence?`;
     messagesContainer.innerHTML = `
       <div class="welcome-message kraken-welcome">
         <div class="welcome-avatar">
-          <div class="kraken-avatar">
-            <div class="tentacle t1"></div>
-            <div class="tentacle t2"></div>
-            <div class="tentacle t3"></div>
-            <div class="tentacle t4"></div>
-            <div class="kraken-head">
-              <div class="kraken-eyes">
-                <div class="eye left"></div>
-                <div class="eye right"></div>
-              </div>
-            </div>
-          </div>
+          <img src="https://i.imgur.com/ZpfsKhB.png" alt="Kraken Avatar" class="welcome-kraken-image">
         </div>
         <div class="welcome-content">
           <h2>🐙 THE KRAKEN AWAKENS</h2>
