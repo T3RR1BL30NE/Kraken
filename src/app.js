@@ -106,6 +106,9 @@ class CodingBot {
 
     // Update model info display
     this.updateModelInfo();
+    
+    // Initialize Kraken theme
+    this.initializeKrakenTheme();
   }
 
   initializeUI() {
@@ -140,8 +143,66 @@ class CodingBot {
 
   updateModelInfo() {
     const modelInfo = document.getElementById('current-model-info');
-    const modelName = MODEL_CONFIG[this.selectedModel]?.name || this.selectedModel;
-    modelInfo.textContent = `${modelName} • Ready`;
+    const modelNames = {
+      mistral7b: '🐙 Kraken Mistral • Ready to Strike',
+      starcoder2: '🐙 Kraken StarCoder • Code Tentacles Active',
+      codellama: '🐙 Kraken CodeLlama • Deep Sea Wisdom'
+    };
+    modelInfo.textContent = modelNames[this.selectedModel] || '🐙 Kraken • Ready';
+  }
+  
+  initializeKrakenTheme() {
+    // Add some dynamic Kraken effects
+    this.addOceanEffects();
+    this.startTentacleAnimations();
+  }
+  
+  addOceanEffects() {
+    // Add floating particles effect
+    const chatArea = document.querySelector('.kraken-chat');
+    if (chatArea) {
+      for (let i = 0; i < 5; i++) {
+        const bubble = document.createElement('div');
+        bubble.className = 'ocean-bubble';
+        bubble.style.cssText = `
+          position: absolute;
+          width: ${Math.random() * 10 + 5}px;
+          height: ${Math.random() * 10 + 5}px;
+          background: rgba(0, 212, 255, 0.1);
+          border-radius: 50%;
+          left: ${Math.random() * 100}%;
+          top: ${Math.random() * 100}%;
+          animation: float-bubble ${Math.random() * 10 + 10}s infinite linear;
+          pointer-events: none;
+          z-index: 0;
+        `;
+        chatArea.appendChild(bubble);
+      }
+    }
+  }
+  
+  startTentacleAnimations() {
+    // Add CSS for bubble animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes float-bubble {
+        0% {
+          transform: translateY(100vh) rotate(0deg);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-100px) rotate(360deg);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
   }
 
   async loadFileTree(dirPath) {
@@ -319,117 +380,119 @@ class CodingBot {
 
   getMistralResponse(message) {
     if (message.toLowerCase().includes('create') || message.toLowerCase().includes('build')) {
-      return `I'll help you create that! Here's a basic structure:
+      return `🐙 **The Kraken stirs...** Let me craft that for you from the depths!
 
 \`\`\`javascript
-// Example implementation
+// Forged in the digital abyss
 function createProject() {
-  // Your code here
-  console.log('Project created successfully!');
+  // Your treasure awaits here
+  console.log('🏴‍☠️ Project spawned from the depths!');
 }
 \`\`\`
 
-Would you like me to elaborate on any specific part?`;
+Shall the Kraken elaborate on any particular tentacle of this creation?`;
     }
     
     if (message.toLowerCase().includes('debug') || message.toLowerCase().includes('fix')) {
-      return `Let me help you debug that issue. Here are some common debugging steps:
+      return `🔱 **The Kraken's debugging trident is ready!** Here's how we hunt the bugs:
 
-1. **Check the console** for error messages
-2. **Add logging** to trace execution flow
-3. **Verify inputs** and data types
-4. **Test edge cases**
+1. **🌊 Scan the depths** - Check console for error messages
+2. **🦑 Deploy tentacles** - Add logging to trace execution flow  
+3. **⚓ Anchor the data** - Verify inputs and data types
+4. **🏴‍☠️ Test the waters** - Probe edge cases
 
-Could you share the specific code that's causing issues?`;
+Share the cursed code with the Kraken, and I shall banish these bugs to the abyss!`;
     }
 
-    return `I understand you want help with: "${message}"
+    return `🐙 **The Kraken hears your call:** *"${message}"*
 
-As Mistral 7B, I can assist with:
-- Code generation and explanation
-- Debugging and troubleshooting
-- Architecture and design patterns
-- Best practices and optimization
+From the digital depths, Kraken Mistral offers these powers:
+- 🦑 **Code Tentacles** - Generation and explanation
+- 🔱 **Bug Hunting** - Debugging and troubleshooting  
+- 🏴‍☠️ **Ship Architecture** - Design patterns and structure
+- ⚡ **Lightning Strikes** - Optimization and best practices
 
-What specific aspect would you like me to focus on?`;
+Which aspect shall the Kraken's tentacles grasp first?`;
   }
 
   getStarCoderResponse(message) {
     if (message.toLowerCase().includes('function') || message.toLowerCase().includes('class')) {
-      return `Here's a well-structured implementation:
+      return `🐙 **Kraken StarCoder emerges with pristine code!**
 
 \`\`\`python
+# Crafted in the deepest trenches of code
 def example_function(param1, param2):
     """
-    Example function with proper documentation.
+    Forged by the Kraken's tentacles with ancient wisdom.
     
     Args:
-        param1: Description of parameter 1
-        param2: Description of parameter 2
+        param1: First treasure from the depths
+        param2: Second offering to the Kraken
     
     Returns:
-        Description of return value
+        The combined power of both treasures
     """
-    # Implementation here
+    # The Kraken's logic flows here
     return param1 + param2
 
-# Usage example
+# Summoning the function
 result = example_function("Hello", " World")
-print(result)
+print(f"🏴‍☠️ {result}")
 \`\`\`
 
-This follows best practices for code structure and documentation.`;
+This code bears the Kraken's seal of quality and ancient coding wisdom!`;
     }
 
-    return `As StarCoder2, I specialize in code generation and completion. 
+    return `🐙 **Kraken StarCoder rises from the code depths!**
 
-For your request: "${message}"
+Your summons: *"${message}"*
 
-I can help with:
-- Writing clean, efficient code
-- Code completion and suggestions
-- Following coding standards
-- Multi-language support
+The Kraken's StarCoder tentacles offer:
+- 🦑 **Clean Code Crafting** - Efficient and elegant solutions
+- ⚡ **Lightning Completion** - Code suggestions from the abyss
+- 🏴‍☠️ **Ancient Standards** - Following the old coding ways
+- 🌊 **Multi-Language Mastery** - Speaking all tongues of code
 
-What programming language and specific functionality do you need?`;
+Which programming language shall the Kraken's tentacles embrace?`;
   }
 
   getCodeLlamaResponse(message) {
     if (message.toLowerCase().includes('algorithm') || message.toLowerCase().includes('optimize')) {
-      return `Here's an optimized approach:
+      return `🐙 **Kraken CodeLlama unleashes algorithmic fury!**
 
 \`\`\`python
+# Optimized by the ancient Kraken algorithms
 def optimized_solution(data):
-    # Time complexity: O(n)
-    # Space complexity: O(1)
+    # ⚡ Time complexity: O(n) - Swift as a striking tentacle
+    # 🌊 Space complexity: O(1) - Efficient as the deep ocean
     
     result = []
     for item in data:
-        # Efficient processing
+        # The Kraken's efficient processing
         processed = process_item(item)
         result.append(processed)
     
     return result
 
 def process_item(item):
-    # Optimized item processing
-    return item * 2  # Example operation
+    # Kraken's optimized item transformation
+    return item * 2  # Doubled by tentacle power
 \`\`\`
 
-This solution is optimized for both time and space complexity.`;
+This solution bears the Kraken's optimization seal - swift and memory-efficient!`;
     }
 
-    return `As CodeLlama, I'm focused on code understanding and generation.
+    return `🐙 **Kraken CodeLlama surfaces from the algorithmic depths!**
 
-For: "${message}"
+Your challenge: *"${message}"*
 
-I can help with:
-- Algorithm implementation
-- Code optimization
-- Complex problem solving
-- Performance analysis
+The Kraken's CodeLlama powers include:
+- 🔱 **Algorithm Mastery** - Complex implementations from the abyss
+- ⚡ **Performance Optimization** - Lightning-fast code enhancement
+- 🧠 **Deep Problem Solving** - Unraveling the most complex mysteries
+- 📊 **Performance Analysis** - Measuring code with ancient precision
 
-What specific coding challenge can I help you solve?`;
+What coding leviathan shall the Kraken help you conquer?`;
   }
 
   handleQuickAction(action) {
@@ -479,6 +542,23 @@ What specific coding challenge can I help you solve?`;
     messageDiv.appendChild(messageContent);
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // Add Kraken-specific message effects
+    if (type === 'bot') {
+      this.addKrakenMessageEffects(messageDiv);
+    }
+  }
+  
+  addKrakenMessageEffects(messageElement) {
+    // Add a subtle glow effect to bot messages
+    messageElement.style.animation = 'message-appear 0.4s ease-out';
+    
+    // Add tentacle decoration to code blocks
+    const codeBlocks = messageElement.querySelectorAll('pre');
+    codeBlocks.forEach(block => {
+      block.style.borderLeft = '4px solid var(--kraken-primary)';
+      block.style.boxShadow = '0 0 10px rgba(0, 212, 255, 0.1)';
+    });
   }
 
   showTypingIndicator() {
@@ -509,23 +589,29 @@ What specific coding challenge can I help you solve?`;
   clearChat() {
     const messagesContainer = document.getElementById('chat-messages');
     messagesContainer.innerHTML = `
-      <div class="welcome-message">
+      <div class="welcome-message kraken-welcome">
         <div class="welcome-avatar">
-          <div class="avatar-gradient">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M16 18l6-6-6-6"/>
-              <path d="M8 6l-6 6 6 6"/>
-            </svg>
+          <div class="kraken-avatar">
+            <div class="tentacle t1"></div>
+            <div class="tentacle t2"></div>
+            <div class="tentacle t3"></div>
+            <div class="tentacle t4"></div>
+            <div class="kraken-head">
+              <div class="kraken-eyes">
+                <div class="eye left"></div>
+                <div class="eye right"></div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="welcome-content">
-          <h2>Welcome back to CodeBot AI</h2>
-          <p>Ready to help with your next coding challenge</p>
+          <h2>🐙 THE KRAKEN AWAKENS</h2>
+          <p>From the digital depths, ready to crush your next coding challenge</p>
           <div class="feature-pills">
-            <span class="pill">Code Generation</span>
-            <span class="pill">Debugging</span>
-            <span class="pill">Refactoring</span>
-            <span class="pill">Documentation</span>
+            <span class="pill kraken-pill">Code Tentacles</span>
+            <span class="pill kraken-pill">Bug Hunting</span>
+            <span class="pill kraken-pill">Deep Refactoring</span>
+            <span class="pill kraken-pill">Ancient Wisdom</span>
           </div>
         </div>
       </div>
