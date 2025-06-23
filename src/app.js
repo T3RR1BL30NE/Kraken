@@ -1,5 +1,6 @@
 import { marked } from 'marked';
 import hljs from 'highlight.js';
+import { MODEL_CONFIG, API_FORMATS } from './config.js';
 
 class CodingBot {
   constructor() {
@@ -13,6 +14,9 @@ class CodingBot {
     this.setupEventListeners();
     this.setupMarkdown();
     this.loadChatHistory();
+    
+    // Test model connections on startup
+    setTimeout(() => this.updateConnectionStatus(), 1000);
   }
 
   setupMarkdown() {
@@ -34,7 +38,8 @@ class CodingBot {
     // Model selection
     document.getElementById('model-select').addEventListener('change', (e) => {
       this.selectedModel = e.target.value;
-      this.addMessage('system', `Switched to ${e.target.value}`);
+      const modelName = MODEL_CONFIG[e.target.value]?.name || e.target.value;
+      this.addMessage('system', `Switched to ${modelName}`);
     });
 
     // Project selection
@@ -146,19 +151,112 @@ class CodingBot {
   }
 
   async callLocalModel(message) {
-    // This would be replaced with actual API calls to your local models
-    // For now, we'll simulate responses based on the selected model
-    
-    const responses = {
-      mistral7b: this.getMistralResponse(message),
-      starcoder2: this.getStarCoderResponse(message),
-      codellama: this.getCodeLlamaResponse(message)
-    };
+    try {
+      // API endpoints for local models
+      const apiEndpoints = {
+        mistral7b: 'http://localhost:11434/api/generate',
+        starcoder2: 'http://localhost:11435/api/generate', 
+        codellama: 'http://localhost:11436/api/generate'
+      };
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+      const endpoint = apiEndpoints[this.selectedModel];
+      if (!endpoint) {
+        throw new Error(`No API endpoint configured for model: ${this.selectedModel}`);
+      }
+
+      // Prepare the request payload
+      const payload = {
+        model: this.selectedModel,
+        prompt: this.buildPrompt(message),
+        stream: false,
+        options: {
+          temperature: 0.7,
+          max_tokens: 2048,
+          top_p: 0.9
+        }
+      };
+
+      // Make the API call
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // Handle different response formats
+      let responseText = '';
+      if (data.response) {
+        responseText = data.response;
+      } else if (data.choices && data.choices[0]) {
+        responseText = data.choices[0].text || data.choices[0].message?.content;
+      } else if (data.text) {
+        responseText = data.text;
+      } else {
+        responseText = JSON.stringify(data);
+      }
+
+      return responseText || "I received your message but couldn't generate a response.";
+
+    } catch (error) {
+      console.error('Error calling local model:', error);
+      
+      // Fallback to simulated response if API fails
+      this.addMessage('system', `⚠️ Could not connect to ${this.selectedModel}. Using fallback response.`);
+      
+      const fallbackResponses = {
+        mistral7b: this.getMistralResponse(message),
+        starcoder2: this.getStarCoderResponse(message),
+        codellama: this.getCodeLlamaResponse(message)
+      };
+      
+      return fallbackResponses[this.selectedModel] || `Error connecting to ${this.selectedModel}: ${error.message}`;
+    }
+  }
+
+  buildPrompt(message) {
+    // Build context-aware prompt with chat history
+    let prompt = '';
     
-    return responses[this.selectedModel] || "I'm here to help with your coding needs!";
+    // Add system context based on selected model
+    const systemPrompts = {
+      mistral7b: 'You are a helpful coding assistant. Provide clear, accurate, and practical coding advice.',
+      starcoder2: 'You are a code generation specialist. Focus on writing clean, efficient, and well-documented code.',
+      codellama: 'You are an expert programmer. Help with algorithms, optimization, and complex coding problems.'
+    };
+    
+    prompt += systemPrompts[this.selectedModel] || 'You are a helpful coding assistant.';
+    prompt += '\n\n';
+    
+    // Add project context if available
+    if (this.currentProject) {
+      prompt += `Current project: ${this.currentProject}\n\n`;
+    }
+    
+    // Add recent chat history for context (last 3 exchanges)
+    const recentHistory = this.chatHistory
+      .filter(msg => msg.type !== 'system')
+      .slice(-6); // Last 6 messages (3 exchanges)
+    
+    if (recentHistory.length > 0) {
+      prompt += 'Recent conversation:\n';
+      recentHistory.forEach(msg => {
+        const role = msg.type === 'user' ? 'Human' : 'Assistant';
+        prompt += `${role}: ${msg.content}\n`;
+      });
+      prompt += '\n';
+    }
+    
+    prompt += `Human: ${message}\nAssistant:`;
+    
+    return prompt;
   }
 
   getMistralResponse(message) {
@@ -365,6 +463,52 @@ I'm ready to help with your coding projects. What would you like to work on?`);
       this.chatHistory = JSON.parse(saved);
       // Optionally restore recent messages
     }
+  }
+
+  // Test connection to local models
+  async testModelConnection(modelName) {
+    try {
+      const config = MODEL_CONFIG[modelName];
+      if (!config) {
+        throw new Error(`Model ${modelName} not configured`);
+      }
+
+      const response = await fetch(config.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: modelName,
+          prompt: 'Hello, are you working?',
+          stream: false,
+          options: { max_tokens: 50 }
+        })
+      });
+
+      return response.ok;
+    } catch (error) {
+      console.error(`Connection test failed for ${modelName}:`, error);
+      return false;
+    }
+  }
+
+  // Add connection status indicator
+  async updateConnectionStatus() {
+    const models = Object.keys(MODEL_CONFIG);
+    const statusPromises = models.map(async (model) => {
+      const isConnected = await this.testModelConnection(model);
+      return { model, isConnected };
+    });
+
+    const statuses = await Promise.all(statusPromises);
+    
+    // Update UI to show connection status
+    const select = document.getElementById('model-select');
+    Array.from(select.options).forEach(option => {
+      const status = statuses.find(s => s.model === option.value);
+      if (status) {
+        option.textContent = `${MODEL_CONFIG[option.value].name} ${status.isConnected ? '🟢' : '🔴'}`;
+      }
+    });
   }
 }
 
