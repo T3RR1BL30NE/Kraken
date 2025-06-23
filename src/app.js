@@ -16,7 +16,7 @@ class CodingBot {
   init() {
     this.setupEventListeners();
     this.setupMarkdown();
-    this.loadChatHistory();
+    this.initializeUI();
     
     // Test model connections on startup
     setTimeout(() => this.updateConnectionStatus(), 1000);
@@ -83,6 +83,11 @@ class CodingBot {
       this.clearChat();
     });
 
+    // Sidebar toggle
+    document.getElementById('sidebar-toggle').addEventListener('click', () => {
+      this.toggleSidebar();
+    });
+
     // API Discovery button
     document.getElementById('discover-apis').addEventListener('click', () => {
       this.discoverAPIs();
@@ -92,6 +97,51 @@ class CodingBot {
     document.getElementById('attach-file').addEventListener('click', () => {
       this.attachFile();
     });
+
+    // Auto-resize textarea
+    const chatInput = document.getElementById('chat-input');
+    chatInput.addEventListener('input', () => {
+      this.autoResizeTextarea(chatInput);
+    });
+
+    // Update model info display
+    this.updateModelInfo();
+  }
+
+  initializeUI() {
+    this.loadChatHistory();
+    this.clearWelcomeMessage();
+  }
+
+  clearWelcomeMessage() {
+    // Remove welcome message if there's chat history
+    if (this.chatHistory.length > 0) {
+      const welcomeMessage = document.querySelector('.welcome-message');
+      if (welcomeMessage) {
+        welcomeMessage.remove();
+      }
+      
+      // Restore chat history
+      this.chatHistory.forEach(msg => {
+        this.addMessageToDOM(msg.type, msg.content);
+      });
+    }
+  }
+
+  toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('collapsed');
+  }
+
+  autoResizeTextarea(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+  }
+
+  updateModelInfo() {
+    const modelInfo = document.getElementById('current-model-info');
+    const modelName = MODEL_CONFIG[this.selectedModel]?.name || this.selectedModel;
+    modelInfo.textContent = `${modelName} • Ready`;
   }
 
   async loadFileTree(dirPath) {
@@ -107,6 +157,10 @@ class CodingBot {
     const fileTree = document.getElementById('file-tree');
     fileTree.innerHTML = '';
 
+    if (items.length === 0) {
+      fileTree.innerHTML = '<div class="file-item" style="color: var(--text-muted); font-style: italic;">No files found</div>';
+      return;
+    }
     items.forEach(item => {
       const fileItem = document.createElement('div');
       fileItem.className = 'file-item';
@@ -384,7 +438,8 @@ What specific coding challenge can I help you solve?`;
       'add-tests': 'Add unit tests for the current code',
       'refactor-code': 'Refactor this code for better maintainability',
       'add-documentation': 'Add comprehensive documentation',
-      'optimize-performance': 'Optimize this code for better performance'
+      'optimize-performance': 'Optimize this code for better performance',
+      'debug-code': 'Help me debug this code and find potential issues'
     };
 
     const message = actions[action];
@@ -394,6 +449,20 @@ What specific coding challenge can I help you solve?`;
   }
 
   addMessage(type, content) {
+    // Remove welcome message when first message is added
+    const welcomeMessage = document.querySelector('.welcome-message');
+    if (welcomeMessage) {
+      welcomeMessage.remove();
+    }
+
+    this.addMessageToDOM(type, content);
+
+    // Save to history
+    this.chatHistory.push({ type, content, timestamp: Date.now() });
+    this.saveChatHistory();
+  }
+
+  addMessageToDOM(type, content) {
     const messagesContainer = document.getElementById('chat-messages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}-message`;
@@ -410,10 +479,6 @@ What specific coding challenge can I help you solve?`;
     messageDiv.appendChild(messageContent);
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-    // Save to history
-    this.chatHistory.push({ type, content, timestamp: Date.now() });
-    this.saveChatHistory();
   }
 
   showTypingIndicator() {
@@ -442,14 +507,32 @@ What specific coding challenge can I help you solve?`;
   }
 
   clearChat() {
-    document.getElementById('chat-messages').innerHTML = '';
+    const messagesContainer = document.getElementById('chat-messages');
+    messagesContainer.innerHTML = `
+      <div class="welcome-message">
+        <div class="welcome-avatar">
+          <div class="avatar-gradient">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M16 18l6-6-6-6"/>
+              <path d="M8 6l-6 6 6 6"/>
+            </svg>
+          </div>
+        </div>
+        <div class="welcome-content">
+          <h2>Welcome back to CodeBot AI</h2>
+          <p>Ready to help with your next coding challenge</p>
+          <div class="feature-pills">
+            <span class="pill">Code Generation</span>
+            <span class="pill">Debugging</span>
+            <span class="pill">Refactoring</span>
+            <span class="pill">Documentation</span>
+          </div>
+        </div>
+      </div>
+    `;
+    
     this.chatHistory = [];
     this.saveChatHistory();
-    
-    // Add welcome message back
-    this.addMessage('bot', `# 👋 Welcome back!
-
-I'm ready to help with your coding projects. What would you like to work on?`);
   }
 
   async attachFile() {
@@ -514,6 +597,16 @@ I'm ready to help with your coding projects. What would you like to work on?`);
 
       const statuses = await Promise.all(statusPromises);
       
+      // Update connection indicator
+      const indicator = document.querySelector('.pulse-dot');
+      const connectedCount = statuses.filter(s => s.isConnected).length;
+      
+      if (connectedCount > 0) {
+        indicator.classList.remove('disconnected');
+      } else {
+        indicator.classList.add('disconnected');
+      }
+      
       // Update UI to show connection status
       const select = document.getElementById('model-select');
       if (select) {
@@ -524,6 +617,9 @@ I'm ready to help with your coding projects. What would you like to work on?`);
           }
         });
       }
+      
+      // Update model info
+      this.updateModelInfo();
       
       // Show connection summary in console
       const connectedCount = statuses.filter(s => s.isConnected).length;
@@ -564,7 +660,11 @@ I'm ready to help with your coding projects. What would you like to work on?`);
         const availableModels = Object.keys(this.modelConfig);
         if (availableModels.length > 0) {
           this.selectedModel = availableModels[0];
-          document.getElementById('model-select').value = this.selectedModel;
+          const select = document.getElementById('model-select');
+          if (select) {
+            select.value = this.selectedModel;
+          }
+          this.updateModelInfo();
         }
         
         // Update API status display

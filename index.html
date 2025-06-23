@@ -3,89 +3,200 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coding Bot Desktop</title>
+  <title>CodeBot AI - Your AI Coding Assistant</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div id="app">
     <div class="app-container">
-      <!-- Sidebar -->
-      <div class="sidebar">
-        <div class="sidebar-header">
-          <h2>🤖 Coding Bot</h2>
-          <div class="model-selector">
-            <label for="model-select">Model:</label>
-            <select id="model-select">
+      <!-- Header Bar -->
+      <div class="header-bar">
+        <div class="header-left">
+          <div class="logo">
+            <div class="logo-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 18l6-6-6-6"/>
+                <path d="M8 6l-6 6 6 6"/>
+              </svg>
+            </div>
+            <span class="logo-text">CodeBot AI</span>
+          </div>
+        </div>
+        
+        <div class="header-center">
+          <div class="model-selector-modern">
+            <div class="model-icon">🤖</div>
+            <select id="model-select" class="model-select-modern">
               <option value="mistral7b">Mistral 7B</option>
               <option value="starcoder2">StarCoder2</option>
               <option value="codellama">CodeLlama</option>
             </select>
-          </div>
-        </div>
-        
-        <div class="project-section">
-          <button id="select-project" class="btn btn-primary">Select Project Folder</button>
-          <div id="project-path" class="project-path"></div>
-          
-          <div class="api-discovery">
-            <button id="discover-apis" class="btn btn-secondary">🔍 Discover APIs</button>
-            <div id="api-status" class="api-status"></div>
+            <div class="connection-indicator" id="connection-indicator">
+              <div class="pulse-dot"></div>
+            </div>
           </div>
         </div>
 
-        <div class="file-explorer" id="file-explorer">
-          <div class="explorer-header">Files</div>
-          <div id="file-tree"></div>
-        </div>
-
-        <div class="quick-actions">
-          <h3>Quick Actions</h3>
-          <button class="action-btn" data-action="create-component">Create Component</button>
-          <button class="action-btn" data-action="add-tests">Add Tests</button>
-          <button class="action-btn" data-action="refactor-code">Refactor Code</button>
-          <button class="action-btn" data-action="add-documentation">Add Documentation</button>
-          <button class="action-btn" data-action="optimize-performance">Optimize Performance</button>
+        <div class="header-right">
+          <button id="discover-apis" class="header-btn" title="Discover APIs">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="21 21l-4.35-4.35"/>
+            </svg>
+          </button>
+          <button id="select-project" class="header-btn" title="Select Project">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+          </button>
         </div>
       </div>
 
-      <!-- Main Content -->
-      <div class="main-content">
-        <div class="chat-container">
-          <div class="chat-messages" id="chat-messages">
-            <div class="message bot-message">
-              <div class="message-content">
-                <h3>👋 Welcome to Coding Bot!</h3>
-                <p>I'm here to help you with your coding projects. I can:</p>
-                <ul>
-                  <li>Generate code in any programming language</li>
-                  <li>Help debug and fix issues</li>
-                  <li>Create project structures and boilerplates</li>
-                  <li>Write tests and documentation</li>
-                  <li>Refactor and optimize existing code</li>
-                  <li>Explain complex concepts</li>
-                </ul>
-                <p>Select a project folder to get started, or just ask me anything!</p>
+      <!-- Main Layout -->
+      <div class="main-layout">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+          <div class="sidebar-toggle" id="sidebar-toggle">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12h18m-9-9l9 9-9 9"/>
+            </svg>
+          </div>
+
+          <div class="sidebar-content">
+            <!-- Project Info -->
+            <div class="project-section">
+              <div class="section-header">
+                <h3>Project</h3>
+              </div>
+              <div id="project-path" class="project-path">No project selected</div>
+              <div id="api-status" class="api-status"></div>
+            </div>
+
+            <!-- File Explorer -->
+            <div class="file-explorer" id="file-explorer">
+              <div class="section-header">
+                <h3>Files</h3>
+                <button class="expand-btn" id="expand-files">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6,9 12,15 18,9"/>
+                  </svg>
+                </button>
+              </div>
+              <div id="file-tree" class="file-tree"></div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+              <div class="section-header">
+                <h3>Quick Actions</h3>
+              </div>
+              <div class="action-grid">
+                <button class="action-card" data-action="create-component">
+                  <div class="action-icon">⚛️</div>
+                  <span>Component</span>
+                </button>
+                <button class="action-card" data-action="add-tests">
+                  <div class="action-icon">🧪</div>
+                  <span>Tests</span>
+                </button>
+                <button class="action-card" data-action="refactor-code">
+                  <div class="action-icon">🔧</div>
+                  <span>Refactor</span>
+                </button>
+                <button class="action-card" data-action="add-documentation">
+                  <div class="action-icon">📚</div>
+                  <span>Docs</span>
+                </button>
+                <button class="action-card" data-action="optimize-performance">
+                  <div class="action-icon">⚡</div>
+                  <span>Optimize</span>
+                </button>
+                <button class="action-card" data-action="debug-code">
+                  <div class="action-icon">🐛</div>
+                  <span>Debug</span>
+                </button>
               </div>
             </div>
           </div>
-          
-          <div class="chat-input-container">
-            <div class="input-wrapper">
-              <textarea 
-                id="chat-input" 
-                placeholder="Ask me anything about coding, or describe what you want to build..."
-                rows="3"
-              ></textarea>
-              <button id="send-button" class="send-btn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="22" y1="2" x2="11" y2="13"></line>
-                  <polygon points="22,2 15,22 11,13 2,9"></polygon>
-                </svg>
-              </button>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area">
+          <div class="chat-container">
+            <div class="chat-messages" id="chat-messages">
+              <div class="welcome-message">
+                <div class="welcome-avatar">
+                  <div class="avatar-gradient">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path d="M16 18l6-6-6-6"/>
+                      <path d="M8 6l-6 6 6 6"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="welcome-content">
+                  <h2>Welcome to CodeBot AI</h2>
+                  <p>Your intelligent coding companion powered by advanced AI models</p>
+                  <div class="feature-pills">
+                    <span class="pill">Code Generation</span>
+                    <span class="pill">Debugging</span>
+                    <span class="pill">Refactoring</span>
+                    <span class="pill">Documentation</span>
+                  </div>
+                  <div class="getting-started">
+                    <p>💡 <strong>Getting Started:</strong></p>
+                    <ul>
+                      <li>Select a project folder to analyze your codebase</li>
+                      <li>Choose your preferred AI model from the header</li>
+                      <li>Ask questions or use quick actions to get started</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="input-actions">
-              <button id="attach-file" class="action-btn-small">📎 Attach File</button>
-              <button id="clear-chat" class="action-btn-small">🗑️ Clear Chat</button>
+            
+            <div class="chat-input-area">
+              <div class="input-container">
+                <div class="input-wrapper">
+                  <div class="input-actions-left">
+                    <button id="attach-file" class="input-action-btn" title="Attach File">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.64 16.2a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <textarea 
+                    id="chat-input" 
+                    placeholder="Ask me anything about your code, or describe what you want to build..."
+                    rows="1"
+                  ></textarea>
+                  
+                  <div class="input-actions-right">
+                    <button id="clear-chat" class="input-action-btn" title="Clear Chat">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18l-2 13H5L3 6z"/>
+                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                    </button>
+                    <button id="send-button" class="send-btn">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22,2 15,22 11,13 2,9"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="input-footer">
+                  <div class="model-info">
+                    <span id="current-model-info">Mistral 7B • Ready</span>
+                  </div>
+                  <div class="shortcuts">
+                    <kbd>⌘</kbd><kbd>Enter</kbd> to send
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
