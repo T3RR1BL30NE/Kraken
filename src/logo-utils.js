@@ -30,6 +30,15 @@ export class KrakenLogoManager {
     }
   }
 
+  // Method to update logo with direct URL (like Imgur direct links)
+  updateLogoFromURL(imageUrl) {
+    if (this.logoElement) {
+      this.logoElement.src = imageUrl;
+      this.logoElement.className = 'kraken-logo';
+      this.applyKrakenEffects();
+    }
+  }
+
   // Method to update logo with SVG
   updateLogoFromSVG(svgContent) {
     if (this.logoElement && this.logoElement.parentNode) {
