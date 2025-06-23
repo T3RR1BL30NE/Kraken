@@ -2,6 +2,7 @@ import { marked } from 'marked';
 import hljs from 'highlight.js';
 import { MODEL_CONFIG, API_FORMATS } from './config.js';
 import { APITester } from './api-tester.js';
+import { KrakenLogoManager } from './logo-utils.js';
 
 class CodingBot {
   constructor() {
@@ -10,6 +11,7 @@ class CodingBot {
     this.chatHistory = [];
     this.apiTester = new APITester();
     this.modelConfig = MODEL_CONFIG; // Initialize with default config
+    this.logoManager = new KrakenLogoManager();
     this.init();
   }
 
@@ -159,14 +161,13 @@ class CodingBot {
   }
   
   setupKrakenLogo() {
-    // Replace the temporary logo with the actual uploaded Kraken logo
-    const logoImg = document.querySelector('.kraken-logo-temp');
-    if (logoImg) {
-      // This would be where we'd use the actual uploaded image
-      // For now, we'll create a placeholder that represents the Kraken theme
-      logoImg.style.filter = 'hue-rotate(200deg) saturate(1.5) brightness(1.2)';
-      logoImg.style.boxShadow = '0 0 15px rgba(0, 212, 255, 0.6)';
-    }
+    // Logo manager handles the logo setup and effects
+    // To use your actual logo, call:
+    // this.logoManager.updateLogoFromBase64('your-base64-string');
+    // or
+    // this.logoManager.updateLogoFromFile('./kraken-logo.png');
+    
+    console.log('🐙 Kraken Logo Manager initialized. Use logoManager.updateLogoFromBase64() to set your logo!');
   }
   
   addOceanEffects() {
