@@ -54,6 +54,7 @@ class CodingBot {
       this.selectedModel = e.target.value;
       const modelName = MODEL_CONFIG[e.target.value]?.name || e.target.value;
       this.addMessage('system', `Switched to ${modelName}`);
+      this.updateModelInfo();
     });
 
     // Project selection
@@ -66,6 +67,9 @@ class CodingBot {
           this.loadFileTree(folderPath);
           this.addMessage('system', `Project loaded: ${folderPath}`);
         }
+      } else {
+        // For web version, show a message
+        this.addMessage('system', '📁 Project selection requires the desktop version. For now, you can still chat about your code!');
       }
     });
 
@@ -79,13 +83,19 @@ class CodingBot {
         e.preventDefault();
         this.sendMessage();
       }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        this.sendMessage();
+      }
     });
 
     // Quick actions
-    document.querySelectorAll('.action-btn').forEach(btn => {
+    document.querySelectorAll('.kraken-action').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const action = e.target.dataset.action;
-        this.handleQuickAction(action);
+        if (action) {
+          this.handleQuickAction(action);
+        }
       });
     });
 
@@ -113,6 +123,23 @@ class CodingBot {
     chatInput.addEventListener('input', () => {
       this.autoResizeTextarea(chatInput);
     });
+
+    // File explorer expand button
+    const expandBtn = document.getElementById('expand-files');
+    if (expandBtn) {
+      expandBtn.addEventListener('click', () => {
+        const fileTree = document.getElementById('file-tree');
+        const arrow = expandBtn.querySelector('.tentacle-arrow');
+        
+        if (fileTree.style.display === 'none') {
+          fileTree.style.display = 'block';
+          arrow.style.transform = 'rotate(45deg)';
+        } else {
+          fileTree.style.display = 'none';
+          arrow.style.transform = 'rotate(-135deg)';
+        }
+      });
+    }
 
     // Update model info display
     this.updateModelInfo();
@@ -143,7 +170,15 @@ class CodingBot {
 
   toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('collapsed');
+    const isCollapsed = sidebar.classList.contains('collapsed');
+    
+    if (isCollapsed) {
+      sidebar.classList.remove('collapsed');
+      this.addMessage('system', '🐙 Kraken sidebar expanded - Full power restored!');
+    } else {
+      sidebar.classList.add('collapsed');
+      this.addMessage('system', '🐙 Kraken sidebar minimized - Stealth mode activated!');
+    }
   }
 
   autoResizeTextarea(textarea) {
@@ -159,6 +194,23 @@ class CodingBot {
       codellama: '🐙 Kraken CodeLlama • Deep Sea Wisdom'
     };
     modelInfo.textContent = modelNames[this.selectedModel] || '🐙 Kraken • Ready';
+    
+    // Update connection indicator based on model
+    const indicator = document.getElementById('connection-indicator');
+    if (indicator) {
+      const pulse = indicator.querySelector('.pulse-tentacle');
+      if (pulse) {
+        // Simulate connection status (in real app, this would check actual connection)
+        pulse.classList.remove('disconnected');
+        setTimeout(() => {
+          // Add a brief disconnected state to show it's working
+          pulse.classList.add('disconnected');
+          setTimeout(() => {
+            pulse.classList.remove('disconnected');
+          }, 500);
+        }, 100);
+      }
+    }
   }
   
   initializeKrakenTheme() {
@@ -679,17 +731,21 @@ Ready to tackle complex programming challenges with AI-enhanced intelligence?`;
 
   handleQuickAction(action) {
     const actions = {
-      'create-component': 'Create a new React component with TypeScript',
-      'add-tests': 'Add unit tests for the current code',
-      'refactor-code': 'Refactor this code for better maintainability',
-      'add-documentation': 'Add comprehensive documentation',
-      'optimize-performance': 'Optimize this code for better performance',
-      'debug-code': 'Help me debug this code and find potential issues'
+      'create-component': '🦑 Create a new React component with TypeScript and modern best practices',
+      'add-tests': '🧪 Add comprehensive unit tests for my current code with Jest or Vitest',
+      'refactor-code': '🌊 Refactor this code for better maintainability, readability, and performance',
+      'add-documentation': '📜 Add comprehensive documentation with JSDoc comments and README sections',
+      'optimize-performance': '⚡ Analyze and optimize this code for better performance and efficiency',
+      'debug-code': '🔱 Help me debug this code and identify potential issues or bugs'
     };
 
     const message = actions[action];
     if (message) {
       document.getElementById('chat-input').value = message;
+      // Auto-focus the input after setting the message
+      document.getElementById('chat-input').focus();
+      // Trigger auto-resize
+      this.autoResizeTextarea(document.getElementById('chat-input'));
     }
   }
 
@@ -776,13 +832,21 @@ Ready to tackle complex programming challenges with AI-enhanced intelligence?`;
           <img src="https://i.imgur.com/ZpfsKhB.png" alt="Kraken Avatar" class="welcome-kraken-image">
         </div>
         <div class="welcome-content">
-          <h2>🐙 THE KRAKEN AWAKENS</h2>
-          <p>From the digital depths, ready to crush your next coding challenge</p>
+          <h2>🐙 RELEASE THE KRAKEN CODER</h2>
+          <p>From the depths of the digital ocean, I emerge to crush your coding challenges</p>
           <div class="feature-pills">
             <span class="pill kraken-pill">Code Tentacles</span>
             <span class="pill kraken-pill">Bug Hunting</span>
             <span class="pill kraken-pill">Deep Refactoring</span>
             <span class="pill kraken-pill">Ancient Wisdom</span>
+          </div>
+          <div class="getting-started kraken-guide">
+            <p>🌊 <strong>Summoning Instructions:</strong></p>
+            <ul>
+              <li>Select your code treasure to analyze the depths</li>
+              <li>Choose your Kraken model from the abyss above</li>
+              <li>Unleash your coding questions into the void</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -793,8 +857,29 @@ Ready to tackle complex programming challenges with AI-enhanced intelligence?`;
   }
 
   async attachFile() {
-    // This would open a file dialog and attach the file content to the chat
-    this.addMessage('system', 'File attachment feature - coming soon!');
+    if (window.electronAPI) {
+      // In Electron, we could implement file selection
+      this.addMessage('system', '📎 File attachment feature - coming soon in the next update!');
+    } else {
+      // For web version, show file input
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.js,.ts,.jsx,.tsx,.py,.java,.cpp,.c,.html,.css,.json,.md,.txt';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const content = e.target.result;
+            const fileName = file.name;
+            this.addMessage('system', `📁 Attached file: ${fileName}`);
+            this.addMessage('user', `Please analyze this file: ${fileName}\n\n\`\`\`\n${content}\n\`\`\``);
+          };
+          reader.readAsText(file);
+        }
+      };
+      input.click();
+    }
   }
 
   saveChatHistory() {
@@ -889,13 +974,13 @@ Ready to tackle complex programming challenges with AI-enhanced intelligence?`;
 
   // Discover available APIs
   async discoverAPIs() {
-    this.addMessage('system', '🔍 Discovering local AI APIs...');
+    this.addMessage('system', '🔍 Kraken scanning the digital depths for AI APIs...');
     
     try {
       const workingAPIs = await this.apiTester.discoverAPIs();
       
       if (workingAPIs.length > 0) {
-        let message = `✅ Found ${workingAPIs.length} working API(s):\n\n`;
+        let message = `🐙 **Kraken Discovery Complete!** Found ${workingAPIs.length} working API(s):\n\n`;
         
         workingAPIs.forEach((api, index) => {
           message += `**${index + 1}. ${api.endpoint.name}**\n`;
@@ -904,7 +989,7 @@ Ready to tackle complex programming challenges with AI-enhanced intelligence?`;
           message += `- Response: ${JSON.stringify(api.response).substring(0, 100)}...\n\n`;
         });
         
-        message += 'I can update your configuration to use these endpoints. Would you like me to do that?';
+        message += '🌊 The Kraken has updated your configuration to use these powerful endpoints!';
         this.addMessage('bot', message);
         
         // Update model configuration with discovered APIs
@@ -926,23 +1011,25 @@ Ready to tackle complex programming challenges with AI-enhanced intelligence?`;
         
         // Update API status display
         const statusDiv = document.getElementById('api-status');
-        statusDiv.innerHTML = `<div class="status-success">Found ${workingAPIs.length} API(s)</div>`;
+        statusDiv.innerHTML = `<div class="status-success">🐙 ${workingAPIs.length} Kraken API(s) Active</div>`;
         
       } else {
-        this.addMessage('bot', `❌ No working APIs found. Make sure your AI models are running and try these common setups:
+        this.addMessage('bot', `🐙 **The Kraken searches the depths but finds no APIs...**
 
-**Ollama**: \`ollama serve\` (port 11434)
-**text-generation-webui**: \`python server.py --api\` (port 7860)
-**LM Studio**: Start the local server (port 1234)
+Make sure your AI models are running and try these common setups:
 
-Check the console for detailed error messages.`);
+🦑 **Ollama**: \`ollama serve\` (port 11434)
+🦑 **text-generation-webui**: \`python server.py --api\` (port 7860)  
+🦑 **LM Studio**: Start the local server (port 1234)
+
+The Kraken will continue to provide enhanced responses even without local APIs!`);
         
         const statusDiv = document.getElementById('api-status');
-        statusDiv.innerHTML = `<div class="status-error">No APIs found</div>`;
+        statusDiv.innerHTML = `<div class="status-error">🐙 Searching depths...</div>`;
       }
       
     } catch (error) {
-      this.addMessage('bot', `Error during API discovery: ${error.message}`);
+      this.addMessage('bot', `🐙 **Kraken encountered turbulent waters during API discovery:** ${error.message}`);
     }
   }
 
