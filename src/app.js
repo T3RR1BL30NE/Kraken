@@ -92,14 +92,16 @@ class CodingBot {
     // Quick actions
     document.querySelectorAll('.kraken-action').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        // Get the action from the button or its parent
-        const action = e.target.closest('.kraken-action')?.dataset.action;
+        e.preventDefault();
+        e.stopPropagation();
+        const actionElement = e.target.closest('.kraken-action');
         if (action) {
           this.handleQuickAction(action);
-          this.addMessage('system', `🐙 Kraken power "${action}" activated!`);
-        }
-        if (action) {
-          this.handleQuickAction(action);
+          const action = actionElement?.dataset.action;
+          if (action) {
+            this.handleQuickAction(action);
+            this.addMessage('system', `🐙 Kraken power "${action}" activated!`);
+          }
         }
       });
     });
@@ -174,17 +176,27 @@ class CodingBot {
   toggleFileExplorer() {
     const fileTree = document.getElementById('file-tree');
     const expandBtn = document.getElementById('expand-files');
+    
+    if (!fileTree || !expandBtn) {
+      console.warn('File tree or expand button not found');
+      return;
+    }
+    
     const arrow = expandBtn.querySelector('.tentacle-arrow');
     
-    if (fileTree.classList.contains('collapsed')) {
+    const isCollapsed = fileTree.style.display === 'none' || fileTree.classList.contains('collapsed');
+    
+    if (isCollapsed) {
       // Expand
+      fileTree.style.display = 'block';
       fileTree.classList.remove('collapsed');
-      arrow.style.transform = 'rotate(45deg)';
+      if (arrow) arrow.style.transform = 'rotate(45deg)';
       this.addMessage('system', '📁 Code vault expanded - Files revealed from the depths!');
     } else {
       // Collapse
       fileTree.classList.add('collapsed');
-      arrow.style.transform = 'rotate(-135deg)';
+      fileTree.style.display = 'none';
+      if (arrow) arrow.style.transform = 'rotate(-135deg)';
       this.addMessage('system', '📁 Code vault sealed - Files hidden in the abyss!');
     }
   }
@@ -211,6 +223,11 @@ class CodingBot {
 
   toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
+    if (!sidebar) {
+      console.warn('Sidebar element not found');
+      return;
+    }
+    
     const isCollapsed = sidebar.classList.contains('collapsed');
     
     if (isCollapsed) {
@@ -772,25 +789,23 @@ Ready to tackle complex programming challenges with AI-enhanced intelligence?`;
 
   handleQuickAction(action) {
     const actions = {
-      'create-component': '🦑 Create a new React component with TypeScript and modern best practices',
-      'add-tests': '🧪 Add comprehensive unit tests for my current code with Jest or Vitest',
-      'refactor-code': '🌊 Refactor this code for better maintainability, readability, and performance',
-      'add-documentation': '📜 Add comprehensive documentation with JSDoc comments and README sections',
-      'optimize-performance': '⚡ Analyze and optimize this code for better performance and efficiency',
-      'debug-code': '🔱 Help me debug this code and identify potential issues or bugs'
+      'create-component': '🦑 Create a new React component with TypeScript and modern best practices. Please provide the component name and basic requirements.',
+      'add-tests': '🧪 Add comprehensive unit tests for my current code with Jest or Vitest. What code would you like me to test?',
+      'refactor-code': '🌊 Refactor this code for better maintainability, readability, and performance. Please share the code you want refactored.',
+      'add-documentation': '📜 Add comprehensive documentation with JSDoc comments and README sections. What code needs documentation?',
+      'optimize-performance': '⚡ Analyze and optimize this code for better performance and efficiency. Share the code you want optimized.',
+      'debug-code': '🔱 Help me debug this code and identify potential issues or bugs. What error are you experiencing?'
     };
 
     const message = actions[action];
     if (message) {
-      document.getElementById('chat-input').value = message;
+      const chatInput = document.getElementById('chat-input');
+      if (chatInput) {
+        chatInput.value = message;
+        chatInput.focus();
+        this.autoResizeTextarea(chatInput);
+      }
       // Auto-focus the input after setting the message
-      document.getElementById('chat-input').focus();
-      // Trigger auto-resize
-      this.autoResizeTextarea(document.getElementById('chat-input'));
-      // Auto-focus the input after setting the message
-      document.getElementById('chat-input').focus();
-      // Trigger auto-resize
-      this.autoResizeTextarea(document.getElementById('chat-input'));
     }
   }
 
@@ -910,6 +925,9 @@ Ready to tackle complex programming challenges with AI-enhanced intelligence?`;
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = '.js,.ts,.jsx,.tsx,.py,.java,.cpp,.c,.html,.css,.json,.md,.txt';
+      input.style.display = 'none';
+      document.body.appendChild(input);
+      
       input.onchange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -919,8 +937,11 @@ Ready to tackle complex programming challenges with AI-enhanced intelligence?`;
             const fileName = file.name;
             this.addMessage('system', `📁 Attached file: ${fileName}`);
             this.addMessage('user', `Please analyze this file: ${fileName}\n\n\`\`\`\n${content}\n\`\`\``);
+            document.body.removeChild(input);
           };
           reader.readAsText(file);
+        } else {
+          document.body.removeChild(input);
         }
       };
       input.click();
