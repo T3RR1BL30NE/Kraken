@@ -605,6 +605,13 @@ body {
   max-height: 0;
   opacity: 0;
   overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.file-tree.collapsed {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
 }
 
 .file-item {

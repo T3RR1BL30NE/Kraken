@@ -96,6 +96,10 @@ class CodingBot {
         const action = e.target.closest('.kraken-action')?.dataset.action;
         if (action) {
           this.handleQuickAction(action);
+          this.addMessage('system', `🐙 Kraken power "${action}" activated!`);
+        }
+        if (action) {
+          this.handleQuickAction(action);
         }
       });
     });
@@ -155,6 +159,32 @@ class CodingBot {
 
     // Update model info display
     this.updateModelInfo();
+    
+    // File explorer expand button
+  toggleFileExplorer() {
+    const fileTree = document.getElementById('file-tree');
+    const expandBtn = document.getElementById('expand-files');
+    const arrow = expandBtn.querySelector('.tentacle-arrow');
+    
+    if (fileTree.classList.contains('collapsed')) {
+      // Expand
+      fileTree.classList.remove('collapsed');
+      arrow.style.transform = 'rotate(45deg)';
+      this.addMessage('system', '📁 Code vault expanded - Files revealed from the depths!');
+    } else {
+      // Collapse
+      fileTree.classList.add('collapsed');
+      arrow.style.transform = 'rotate(-135deg)';
+      this.addMessage('system', '📁 Code vault sealed - Files hidden in the abyss!');
+    }
+  }
+  
+    const expandBtn = document.getElementById('expand-files');
+    if (expandBtn) {
+      expandBtn.addEventListener('click', () => {
+        this.toggleFileExplorer();
+      });
+    }
     
     // Initialize Kraken theme
     this.initializeKrakenTheme();
@@ -754,6 +784,10 @@ Ready to tackle complex programming challenges with AI-enhanced intelligence?`;
     const message = actions[action];
     if (message) {
       document.getElementById('chat-input').value = message;
+      // Auto-focus the input after setting the message
+      document.getElementById('chat-input').focus();
+      // Trigger auto-resize
+      this.autoResizeTextarea(document.getElementById('chat-input'));
       // Auto-focus the input after setting the message
       document.getElementById('chat-input').focus();
       // Trigger auto-resize
