@@ -971,7 +971,6 @@ Ready to tackle complex programming challenges with AI-enhanced intelligence?`;
       this.updateModelInfo();
       
       // Show connection summary in console
-      const connectedCount = statuses.filter(s => s.isConnected).length;
       console.info(`Model connection status: ${connectedCount}/${statuses.length} models connected`);
       
     } catch (error) {
