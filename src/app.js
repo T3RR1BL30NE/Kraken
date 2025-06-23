@@ -92,7 +92,8 @@ class CodingBot {
     // Quick actions
     document.querySelectorAll('.kraken-action').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const action = e.target.dataset.action;
+        // Get the action from the button or its parent
+        const action = e.target.closest('.kraken-action')?.dataset.action;
         if (action) {
           this.handleQuickAction(action);
         }
@@ -131,12 +132,23 @@ class CodingBot {
         const fileTree = document.getElementById('file-tree');
         const arrow = expandBtn.querySelector('.tentacle-arrow');
         
-        if (fileTree.style.display === 'none') {
+        const isHidden = fileTree.style.display === 'none' || fileTree.style.maxHeight === '0px';
+        
+        if (isHidden) {
           fileTree.style.display = 'block';
+          fileTree.style.maxHeight = '300px';
           arrow.style.transform = 'rotate(45deg)';
+          this.addMessage('system', '📁 Code vault expanded - Files revealed!');
         } else {
-          fileTree.style.display = 'none';
+          fileTree.style.maxHeight = '0px';
+          fileTree.style.overflow = 'hidden';
           arrow.style.transform = 'rotate(-135deg)';
+          this.addMessage('system', '📁 Code vault sealed - Files hidden in the depths!');
+          setTimeout(() => {
+            if (fileTree.style.maxHeight === '0px') {
+              fileTree.style.display = 'none';
+            }
+          }, 300);
         }
       });
     }

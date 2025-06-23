@@ -598,6 +598,13 @@ body {
 .file-tree {
   max-height: 300px;
   overflow-y: auto;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.file-tree.collapsed {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
 }
 
 .file-item {
@@ -671,6 +678,7 @@ body {
   color: var(--text-mist);
   position: relative;
   overflow: hidden;
+  user-select: none;
 }
 
 .kraken-action::before {
@@ -699,9 +707,22 @@ body {
     0 6px 25px rgba(139, 92, 246, 0.2);
 }
 
+.kraken-action:active {
+  transform: translateY(-2px);
+  box-shadow: 
+    var(--shadow-tentacle),
+    0 0 15px rgba(139, 92, 246, 0.3),
+    0 3px 15px rgba(139, 92, 246, 0.2);
+}
+
 .action-icon {
   font-size: 24px;
   filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.3));
+  pointer-events: none;
+}
+
+.kraken-action span {
+  pointer-events: none;
 }
 
 /* Chat Area */
