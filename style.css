@@ -89,6 +89,41 @@ body {
   word-break: break-all;
 }
 
+.api-discovery {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #404040;
+}
+
+.btn-secondary {
+  background: #666;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.btn-secondary:hover {
+  background: #777;
+}
+
+.api-status {
+  font-size: 0.8rem;
+  padding: 5px 0;
+}
+
+.status-success {
+  color: #4ade80;
+}
+
+.status-error {
+  color: #f87171;
+}
+
 .file-explorer {
   flex: 1;
   padding: 20px;

@@ -1,12 +1,14 @@
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 import { MODEL_CONFIG, API_FORMATS } from './config.js';
+import { APITester } from './api-tester.js';
 
 class CodingBot {
   constructor() {
     this.currentProject = null;
     this.selectedModel = 'mistral7b';
     this.chatHistory = [];
+    this.apiTester = new APITester();
     this.init();
   }
 
@@ -78,6 +80,11 @@ class CodingBot {
     // Clear chat
     document.getElementById('clear-chat').addEventListener('click', () => {
       this.clearChat();
+    });
+
+    // API Discovery button
+    document.getElementById('discover-apis').addEventListener('click', () => {
+      this.discoverAPIs();
     });
 
     // Attach file
@@ -509,6 +516,48 @@ I'm ready to help with your coding projects. What would you like to work on?`);
         option.textContent = `${MODEL_CONFIG[option.value].name} ${status.isConnected ? '🟢' : '🔴'}`;
       }
     });
+  }
+
+  // Discover available APIs
+  async discoverAPIs() {
+    this.addMessage('system', '🔍 Discovering local AI APIs...');
+    
+    try {
+      const workingAPIs = await this.apiTester.discoverAPIs();
+      
+      if (workingAPIs.length > 0) {
+        let message = `✅ Found ${workingAPIs.length} working API(s):\n\n`;
+        
+        workingAPIs.forEach((api, index) => {
+          message += `**${index + 1}. ${api.endpoint.name}**\n`;
+          message += `- URL: \`${api.endpoint.url}\`\n`;
+          message += `- Format: ${api.format}\n`;
+          message += `- Response: ${JSON.stringify(api.response).substring(0, 100)}...\n\n`;
+        });
+        
+        message += 'I can update your configuration to use these endpoints. Would you like me to do that?';
+        this.addMessage('bot', message);
+        
+        // Update API status display
+        const statusDiv = document.getElementById('api-status');
+        statusDiv.innerHTML = `<div class="status-success">Found ${workingAPIs.length} API(s)</div>`;
+        
+      } else {
+        this.addMessage('bot', `❌ No working APIs found. Make sure your AI models are running and try these common setups:
+
+**Ollama**: \`ollama serve\` (port 11434)
+**text-generation-webui**: \`python server.py --api\` (port 7860)
+**LM Studio**: Start the local server (port 1234)
+
+Check the console for detailed error messages.`);
+        
+        const statusDiv = document.getElementById('api-status');
+        statusDiv.innerHTML = `<div class="status-error">No APIs found</div>`;
+      }
+      
+    } catch (error) {
+      this.addMessage('bot', `Error during API discovery: ${error.message}`);
+    }
   }
 }
 
