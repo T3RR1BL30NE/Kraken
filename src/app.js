@@ -159,26 +159,26 @@ class CodingBot {
 
   async callLocalModel(message) {
     try {
-      // API endpoints for local models
-      const apiEndpoints = {
-        mistral7b: 'http://localhost:11434/api/generate',
-        starcoder2: 'http://localhost:11435/api/generate', 
-        codellama: 'http://localhost:11436/api/generate'
+      // All models use Ollama on port 11434
+      const endpoint = 'http://localhost:11434/api/generate';
+      
+      // Map our model names to actual Ollama model names
+      const ollamaModelNames = {
+        mistral7b: 'mistral',
+        starcoder2: 'starcoder2',
+        codellama: 'codellama'
       };
-
-      const endpoint = apiEndpoints[this.selectedModel];
-      if (!endpoint) {
-        throw new Error(`No API endpoint configured for model: ${this.selectedModel}`);
-      }
+      
+      const actualModelName = ollamaModelNames[this.selectedModel] || this.selectedModel;
 
       // Prepare the request payload
       const payload = {
-        model: this.selectedModel,
+        model: actualModelName,
         prompt: this.buildPrompt(message),
         stream: false,
         options: {
           temperature: 0.7,
-          max_tokens: 2048,
+          num_predict: 2048,
           top_p: 0.9
         }
       };
@@ -198,25 +198,14 @@ class CodingBot {
 
       const data = await response.json();
       
-      // Handle different response formats
-      let responseText = '';
-      if (data.response) {
-        responseText = data.response;
-      } else if (data.choices && data.choices[0]) {
-        responseText = data.choices[0].text || data.choices[0].message?.content;
-      } else if (data.text) {
-        responseText = data.text;
-      } else {
-        responseText = JSON.stringify(data);
-      }
-
-      return responseText || "I received your message but couldn't generate a response.";
+      // Ollama returns the response in the 'response' field
+      return data.response || "I received your message but couldn't generate a response.";
 
     } catch (error) {
       console.error('Error calling local model:', error);
       
       // Fallback to simulated response if API fails
-      this.addMessage('system', `⚠️ Could not connect to ${this.selectedModel}. Using fallback response.`);
+      this.addMessage('system', `⚠️ Could not connect to Ollama (${this.selectedModel}). Make sure Ollama is running with: ollama serve`);
       
       const fallbackResponses = {
         mistral7b: this.getMistralResponse(message),

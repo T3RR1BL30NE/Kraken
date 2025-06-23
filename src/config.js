@@ -6,27 +6,27 @@ export const MODEL_CONFIG = {
     description: 'General purpose coding assistant',
     options: {
       temperature: 0.7,
-      max_tokens: 2048,
+      num_predict: 2048,
       top_p: 0.9
     }
   },
   starcoder2: {
     name: 'StarCoder2',
-    endpoint: 'http://localhost:11435/api/generate',
+    endpoint: 'http://localhost:11434/api/generate',
     description: 'Code generation specialist',
     options: {
       temperature: 0.3,
-      max_tokens: 4096,
+      num_predict: 4096,
       top_p: 0.95
     }
   },
   codellama: {
     name: 'CodeLlama',
-    endpoint: 'http://localhost:11436/api/generate',
+    endpoint: 'http://localhost:11434/api/generate',
     description: 'Advanced programming assistant',
     options: {
       temperature: 0.5,
-      max_tokens: 4096,
+      num_predict: 4096,
       top_p: 0.9
     }
   }
