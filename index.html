@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coding Bot Desktop</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+</head>
+<body>
+  <div id="app">
+    <div class="app-container">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <h2>🤖 Coding Bot</h2>
+          <div class="model-selector">
+            <label for="model-select">Model:</label>
+            <select id="model-select">
+              <option value="mistral7b">Mistral 7B</option>
+              <option value="starcoder2">StarCoder2</option>
+              <option value="codellama">CodeLlama</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="project-section">
+          <button id="select-project" class="btn btn-primary">Select Project Folder</button>
+          <div id="project-path" class="project-path"></div>
+        </div>
+
+        <div class="file-explorer" id="file-explorer">
+          <div class="explorer-header">Files</div>
+          <div id="file-tree"></div>
+        </div>
+
+        <div class="quick-actions">
+          <h3>Quick Actions</h3>
+          <button class="action-btn" data-action="create-component">Create Component</button>
+          <button class="action-btn" data-action="add-tests">Add Tests</button>
+          <button class="action-btn" data-action="refactor-code">Refactor Code</button>
+          <button class="action-btn" data-action="add-documentation">Add Documentation</button>
+          <button class="action-btn" data-action="optimize-performance">Optimize Performance</button>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="chat-container">
+          <div class="chat-messages" id="chat-messages">
+            <div class="message bot-message">
+              <div class="message-content">
+                <h3>👋 Welcome to Coding Bot!</h3>
+                <p>I'm here to help you with your coding projects. I can:</p>
+                <ul>
+                  <li>Generate code in any programming language</li>
+                  <li>Help debug and fix issues</li>
+                  <li>Create project structures and boilerplates</li>
+                  <li>Write tests and documentation</li>
+                  <li>Refactor and optimize existing code</li>
+                  <li>Explain complex concepts</li>
+                </ul>
+                <p>Select a project folder to get started, or just ask me anything!</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="chat-input-container">
+            <div class="input-wrapper">
+              <textarea 
+                id="chat-input" 
+                placeholder="Ask me anything about coding, or describe what you want to build..."
+                rows="3"
+              ></textarea>
+              <button id="send-button" class="send-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22,2 15,22 11,13 2,9"></polygon>
+                </svg>
+              </button>
+            </div>
+            <div class="input-actions">
+              <button id="attach-file" class="action-btn-small">📎 Attach File</button>
+              <button id="clear-chat" class="action-btn-small">🗑️ Clear Chat</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>
