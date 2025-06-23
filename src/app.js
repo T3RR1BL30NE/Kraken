@@ -155,6 +155,18 @@ class CodingBot {
     // Add some dynamic Kraken effects
     this.addOceanEffects();
     this.startTentacleAnimations();
+    this.setupKrakenLogo();
+  }
+  
+  setupKrakenLogo() {
+    // Replace the temporary logo with the actual uploaded Kraken logo
+    const logoImg = document.querySelector('.kraken-logo-temp');
+    if (logoImg) {
+      // This would be where we'd use the actual uploaded image
+      // For now, we'll create a placeholder that represents the Kraken theme
+      logoImg.style.filter = 'hue-rotate(200deg) saturate(1.5) brightness(1.2)';
+      logoImg.style.boxShadow = '0 0 15px rgba(0, 212, 255, 0.6)';
+    }
   }
   
   addOceanEffects() {

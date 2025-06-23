@@ -144,10 +144,11 @@ body {
   overflow: hidden;
 }
 
-.kraken-logo {
+.kraken-logo-temp {
   width: 32px;
   height: 32px;
-  filter: brightness(0) invert(1);
+  border-radius: 4px;
+  object-fit: cover;
 }
 
 .logo-icon::before {
