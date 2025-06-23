@@ -88,7 +88,18 @@ body {
   bottom: 0;
   background: 
     radial-gradient(circle at 20% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(0, 153, 204, 0.1) 0%, transparent 50%);
+    radial-gradient(circle at 80% 20%, rgba(0, 153, 204, 0.1) 0%, transparent 50%),
+    url('https://i.imgur.com/ZpfsKhB.png');
+  background-size: 
+    100% 100%,
+    100% 100%,
+    200px 200px;
+  background-position: 
+    center,
+    center,
+    center center;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  opacity: 0.03;
   pointer-events: none;
   z-index: 0;
 }
@@ -409,6 +420,35 @@ body {
   box-shadow: var(--shadow-glow);
 }
 
+.kraken-sidebar::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120px;
+  height: 120px;
+  background: url('https://i.imgur.com/ZpfsKhB.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  transform: translate(-50%, -50%);
+  opacity: 0.02;
+  pointer-events: none;
+  z-index: 0;
+  animation: sidebar-kraken-pulse 15s ease-in-out infinite;
+}
+
+@keyframes sidebar-kraken-pulse {
+  0%, 100% { 
+    opacity: 0.02;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% { 
+    opacity: 0.06;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
 .kraken-sidebar.collapsed {
   width: 70px;
 }
@@ -687,8 +727,31 @@ body {
   bottom: 0;
   background: 
     radial-gradient(circle at 30% 70%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 70% 30%, rgba(77, 121, 164, 0.05) 0%, transparent 50%);
+    radial-gradient(circle at 70% 30%, rgba(77, 121, 164, 0.05) 0%, transparent 50%),
+    url('https://i.imgur.com/ZpfsKhB.png');
+  background-size: 
+    100% 100%,
+    100% 100%,
+    300px 300px;
+  background-position: 
+    center,
+    center,
+    center center;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  opacity: 0.05;
   pointer-events: none;
+  animation: subtle-float 20s ease-in-out infinite;
+}
+
+@keyframes subtle-float {
+  0%, 100% { 
+    transform: translateY(0px) scale(1);
+    opacity: 0.05;
+  }
+  50% { 
+    transform: translateY(-10px) scale(1.02);
+    opacity: 0.08;
+  }
 }
 
 .chat-container {
