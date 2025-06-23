@@ -110,7 +110,6 @@ class CodingBot {
     });
 
     // Auto-resize textarea
-    const chatInput = document.getElementById('chat-input');
     chatInput.addEventListener('input', () => {
       this.autoResizeTextarea(chatInput);
     });
@@ -372,11 +371,11 @@ class CodingBot {
       const data = await response.json();
       
       // Enhance the response with smart formatting and context
-      let response = data.response || "I received your message but couldn't generate a response.";
+      let modelResponseContent = data.response || "I received your message but couldn't generate a response.";
       
       // Apply intelligent response enhancement
       const intent = this.smartPrompts.analyzeIntent(message);
-      response = this.responseGenerator.enhanceResponse(response, { 
+      modelResponseContent = this.responseGenerator.enhanceResponse(modelResponseContent, { 
         intent, 
         context,
         originalMessage: message 
@@ -385,11 +384,11 @@ class CodingBot {
       // Add to conversation memory for future context
       this.contextManager.addToMemory({
         userMessage: message,
-        response: response,
+        response: modelResponseContent,
         context: context
       });
       
-      return response;
+      return modelResponseContent;
 
     } catch (error) {
       console.error('Error calling local model:', error);
