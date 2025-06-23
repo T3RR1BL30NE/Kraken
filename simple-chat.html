@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Working AI Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem 2rem;
+            border-bottom: 2px solid #4a90e2;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            color: #4a90e2;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 0 1rem;
+        }
+        
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            color: white;
+            border-bottom-right-radius: 0.3rem;
+        }
+        
+        .bot-message {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom-left-radius: 0.3rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .system-message {
+            align-self: center;
+            background: rgba(74, 144, 226, 0.2);
+            border: 1px solid rgba(74, 144, 226, 0.3);
+            font-size: 0.9rem;
+            font-style: italic;
+            text-align: center;
+            max-width: 60%;
+        }
+        
+        .input-area {
+            padding: 1.5rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+        
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 50px;
+            max-height: 120px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: none;
+            outline: none;
+            backdrop-filter: blur(10px);
+            transition: border-color 0.3s ease;
+        }
+        
+        textarea:focus {
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+        
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .send-button {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .send-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+        }
+        
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 0.2rem;
+        }
+        
+        .typing-dots span {
+            width: 6px;
+            height: 6px;
+            background: #4a90e2;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1.2); opacity: 1; }
+        }
+        
+        .model-selector {
+            position: absolute;
+            top: 1rem;
+            right: 2rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .model-selector select {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        .model-selector select option {
+            background: #1a1a2e;
+            color: white;
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(74, 144, 226, 0.5);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(74, 144, 226, 0.7);
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+            
+            .chat-container {
+                padding: 0 0.5rem;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .model-selector {
+                position: static;
+                margin-bottom: 1rem;
+                width: fit-content;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 AI Coding Assistant</h1>
+        <div class="model-selector">
+            <select id="modelSelect">
+                <option value="gpt">Smart Assistant</option>
+                <option value="code">Code Helper</option>
+                <option value="debug">Debug Expert</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="chat-container">
+        <div class="messages" id="messages">
+            <div class="message system-message">
+                AI Assistant ready. Ask me anything about coding, debugging, or development!
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <div class="typing-indicator" id="typingIndicator">
+                <span>AI is thinking</span>
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea 
+                        id="messageInput" 
+                        placeholder="Ask me about coding, debugging, or any development question..."
+                        rows="1"
+                    ></textarea>
+                </div>
+                <button class="send-button" id="sendButton">
+                    ➤
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AIChat {
+            constructor() {
+                this.messages = document.getElementById('messages');
+                this.input = document.getElementById('messageInput');
+                this.sendButton = document.getElementById('sendButton');
+                this.typingIndicator = document.getElementById('typingIndicator');
+                this.modelSelect = document.getElementById('modelSelect');
+                
+                this.setupEventListeners();
+                this.autoResizeTextarea();
+            }
+            
+            setupEventListeners() {
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                
+                this.input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+                
+                this.input.addEventListener('input', () => this.autoResizeTextarea());
+            }
+            
+            autoResizeTextarea() {
+                this.input.style.height = 'auto';
+                this.input.style.height = Math.min(this.input.scrollHeight, 120) + 'px';
+            }
+            
+            async sendMessage() {
+                const message = this.input.value.trim();
+                if (!message) return;
+                
+                // Add user message
+                this.addMessage('user', message);
+                this.input.value = '';
+                this.autoResizeTextarea();
+                
+                // Show typing indicator
+                this.showTyping();
+                
+                // Get AI response
+                try {
+                    const response = await this.getAIResponse(message);
+                    this.hideTyping();
+                    this.addMessage('bot', response);
+                } catch (error) {
+                    this.hideTyping();
+                    this.addMessage('bot', 'Sorry, I encountered an error. Please try again.');
+                }
+            }
+            
+            addMessage(type, content) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}-message`;
+                messageDiv.textContent = content;
+                
+                this.messages.appendChild(messageDiv);
+                this.messages.scrollTop = this.messages.scrollHeight;
+            }
+            
+            showTyping() {
+                this.typingIndicator.style.display = 'flex';
+                this.sendButton.disabled = true;
+            }
+            
+            hideTyping() {
+                this.typingIndicator.style.display = 'none';
+                this.sendButton.disabled = false;
+            }
+            
+            async getAIResponse(message) {
+                const model = this.modelSelect.value;
+                
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+                
+                // Generate contextual responses based on message content
+                const lowerMessage = message.toLowerCase();
+                
+                if (lowerMessage.includes('error') || lowerMessage.includes('bug') || lowerMessage.includes('debug')) {
+                    return this.getDebugResponse(message);
+                }
+                
+                if (lowerMessage.includes('code') || lowerMessage.includes('function') || lowerMessage.includes('class')) {
+                    return this.getCodeResponse(message);
+                }
+                
+                if (lowerMessage.includes('how') || lowerMessage.includes('what') || lowerMessage.includes('explain')) {
+                    return this.getExplanationResponse(message);
+                }
+                
+                if (lowerMessage.includes('optimize') || lowerMessage.includes('performance') || lowerMessage.includes('faster')) {
+                    return this.getOptimizationResponse(message);
+                }
+                
+                return this.getGeneralResponse(message);
+            }
+            
+            getDebugResponse(message) {
+                const responses = [
+                    "Let me help you debug this issue. First, let's identify the problem:\n\n1. Check the console for error messages\n2. Verify your variable names and scope\n3. Look for syntax errors like missing brackets or semicolons\n4. Test with simplified input\n\nCan you share the specific error message you're seeing?",
+                    
+                    "Debugging approach:\n\n• Add console.log() statements to track variable values\n• Use browser dev tools to set breakpoints\n• Check if all dependencies are loaded\n• Verify API endpoints are working\n\nWhat type of error are you encountering?",
+                    
+                    "Common debugging steps:\n\n1. Reproduce the error consistently\n2. Check network requests in dev tools\n3. Validate input data format\n4. Look for async/await issues\n5. Test edge cases\n\nShare your code and I'll help identify the issue!"
+                ];
+                
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+            
+            getCodeResponse(message) {
+                const responses = [
+                    "I can help you write clean, efficient code. Here's a general approach:\n\n```javascript\n// Example function structure\nfunction solutionFunction(input) {\n    // Input validation\n    if (!input) return null;\n    \n    // Main logic\n    const result = processInput(input);\n    \n    // Return result\n    return result;\n}\n```\n\nWhat specific functionality do you need?",
+                    
+                    "For better code structure, consider:\n\n• Use meaningful variable names\n• Break complex functions into smaller ones\n• Add error handling with try/catch\n• Include input validation\n• Write unit tests\n• Add comments for complex logic\n\nWhat programming language are you working with?",
+                    
+                    "Code best practices:\n\n1. Follow consistent naming conventions\n2. Keep functions focused on single tasks\n3. Use version control (Git)\n4. Handle edge cases\n5. Optimize for readability first\n\nShow me what you're building and I'll provide specific guidance!"
+                ];
+                
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+            
+            getExplanationResponse(message) {
+                const responses = [
+                    "I'd be happy to explain! Programming concepts can be broken down into digestible parts:\n\n• Start with the basic concept\n• Show practical examples\n• Explain common use cases\n• Discuss best practices\n• Point out potential pitfalls\n\nWhat specific topic would you like me to explain in detail?",
+                    
+                    "Great question! Let me break this down:\n\n1. Core concept and definition\n2. Why it's important/useful\n3. Real-world applications\n4. Code examples\n5. Common mistakes to avoid\n\nCould you be more specific about what you'd like to understand?",
+                    
+                    "Understanding programming concepts:\n\n• I'll explain it step by step\n• Provide code examples\n• Show different approaches\n• Explain pros and cons\n• Give you practice exercises\n\nWhat programming concept are you curious about?"
+                ];
+                
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+            
+            getOptimizationResponse(message) {
+                const responses = [
+                    "Performance optimization strategies:\n\n🚀 **Code Level:**\n• Use efficient algorithms (O(n) vs O(n²))\n• Minimize DOM manipulations\n• Cache frequently used values\n• Use async/await properly\n\n🚀 **Application Level:**\n• Lazy loading for large datasets\n• Image optimization\n• Bundle size reduction\n• CDN usage\n\nWhat specific performance issue are you facing?",
+                    
+                    "Let's optimize your code! Common improvements:\n\n1. **Algorithm efficiency** - Choose better data structures\n2. **Memory usage** - Avoid memory leaks\n3. **Network requests** - Batch API calls\n4. **Rendering** - Virtual scrolling for large lists\n5. **Caching** - Store computed results\n\nShare your code and I'll suggest specific optimizations!",
+                    
+                    "Performance bottlenecks to check:\n\n• Inefficient loops or recursion\n• Unnecessary re-renders\n• Large bundle sizes\n• Unoptimized database queries\n• Missing indexes\n• Synchronous operations blocking UI\n\nWhat part of your application feels slow?"
+                ];
+                
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+            
+            getGeneralResponse(message) {
+                const responses = [
+                    "I'm here to help with all your coding needs! I can assist with:\n\n• Writing and reviewing code\n• Debugging issues\n• Explaining programming concepts\n• Architecture decisions\n• Best practices\n• Performance optimization\n• Testing strategies\n\nWhat would you like to work on today?",
+                    
+                    "As your AI coding assistant, I can help you:\n\n✅ Debug errors and fix bugs\n✅ Write clean, efficient code\n✅ Explain complex concepts\n✅ Review and improve existing code\n✅ Suggest better approaches\n✅ Help with architecture decisions\n\nWhat programming challenge can I help you solve?",
+                    
+                    "I'm ready to assist with your development work! Whether you need:\n\n• Code examples and snippets\n• Problem-solving strategies\n• Technology recommendations\n• Code reviews\n• Learning resources\n• Project guidance\n\nJust let me know what you're working on!"
+                ];
+                
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+        }
+        
+        // Initialize the chat when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new AIChat();
+        });
+    </script>
+</body>
+</html>

@@ -128,32 +128,33 @@ class CodingBot {
     const expandBtn = document.getElementById('expand-files');
     if (expandBtn) {
       expandBtn.addEventListener('click', () => {
-        const fileTree = document.getElementById('file-tree');
-        const arrow = expandBtn.querySelector('.tentacle-arrow');
-        
-        const isHidden = fileTree.style.display === 'none' || fileTree.style.maxHeight === '0px';
-        
-        if (isHidden) {
-          fileTree.style.display = 'block';
-          fileTree.style.maxHeight = '300px';
-          arrow.style.transform = 'rotate(45deg)';
-          this.addMessage('system', '📁 Code vault expanded - Files revealed!');
-        } else {
-          fileTree.style.maxHeight = '0px';
-          fileTree.style.overflow = 'hidden';
-          arrow.style.transform = 'rotate(-135deg)';
-          this.addMessage('system', '📁 Code vault sealed - Files hidden in the depths!');
-          setTimeout(() => {
-            if (fileTree.style.maxHeight === '0px') {
-              fileTree.style.display = 'none';
-            }
-          }, 300);
-        }
+        this.toggleFileExplorer();
       });
     }
 
+    // Initialize Kraken theme
+    this.initializeKrakenTheme();
+    
     // Update model info display
     this.updateModelInfo();
+  }
+
+  toggleFileExplorer() {
+    const fileTree = document.getElementById('file-tree');
+    const expandBtn = document.getElementById('expand-files');
+    const arrow = expandBtn.querySelector('.tentacle-arrow');
+    
+    if (fileTree.classList.contains('collapsed')) {
+      // Expand
+      fileTree.classList.remove('collapsed');
+      arrow.style.transform = 'rotate(45deg)';
+      this.addMessage('system', '📁 Code vault expanded - Files revealed from the depths!');
+    } else {
+      // Collapse
+      fileTree.classList.add('collapsed');
+      arrow.style.transform = 'rotate(-135deg)';
+      this.addMessage('system', '📁 Code vault sealed - Files hidden in the abyss!');
+    }
   }
 
   initializeUI() {
