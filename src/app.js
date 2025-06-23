@@ -95,13 +95,10 @@ class CodingBot {
         e.preventDefault();
         e.stopPropagation();
         const actionElement = e.target.closest('.kraken-action');
+        const action = actionElement?.dataset.action;
         if (action) {
           this.handleQuickAction(action);
-          const action = actionElement?.dataset.action;
-          if (action) {
-            this.handleQuickAction(action);
-            this.addMessage('system', `🐙 Kraken power "${action}" activated!`);
-          }
+          this.addMessage('system', `🐙 Kraken power "${action}" activated!`);
         }
       });
     });
