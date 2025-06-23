@@ -11,10 +11,10 @@
 :root {
   /* Kraken Color Palette - Deep Ocean Theme */
   --kraken-deep: #000000;
-  --kraken-abyss: #111111;
-  --kraken-dark: #1a1a1a;
-  --kraken-surface: #222222;
-  --kraken-foam: #333333;
+  --kraken-abyss: #000000;
+  --kraken-dark: #000000;
+  --kraken-surface: #000000;
+  --kraken-foam: #111111;
   
   --kraken-primary: #8b5cf6;
   --kraken-secondary: #7c3aed;
@@ -24,7 +24,7 @@
   
   --kraken-gradient: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
   --kraken-glow: linear-gradient(135deg, #c084fc 0%, #8b5cf6 100%);
-  --kraken-deep-gradient: linear-gradient(180deg, #000000 0%, #1a1a1a 100%);
+  --kraken-deep-gradient: linear-gradient(180deg, #000000 0%, #000000 100%);
   
   --text-kraken: #ffffff;
   --text-foam: #e5d4f1;
@@ -75,7 +75,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: var(--kraken-deep-gradient);
+  background: #000000;
   position: relative;
 }
 
@@ -100,7 +100,7 @@ body {
   justify-content: space-between;
   height: 70px;
   padding: 0 var(--space-xl);
-  background: rgba(17, 17, 17, 0.95);
+  background: rgba(0, 0, 0, 0.95);
   border-bottom: 2px solid var(--kraken-tentacle);
   backdrop-filter: blur(20px);
   z-index: 100;
@@ -208,7 +208,7 @@ body {
 .model-selector-kraken {
   display: flex;
   align-items: center;
-  background: rgba(34, 34, 34, 0.8);
+  background: rgba(0, 0, 0, 0.8);
   border: 2px solid var(--kraken-tentacle);
   border-radius: var(--radius-xl);
   padding: var(--space-sm);
@@ -384,7 +384,7 @@ body {
 /* Kraken Sidebar */
 .kraken-sidebar {
   width: 350px;
-  background: rgba(17, 17, 17, 0.95);
+  background: rgba(0, 0, 0, 0.95);
   border-right: 2px solid var(--kraken-tentacle);
   display: flex;
   flex-direction: column;
@@ -535,7 +535,7 @@ body {
 
 /* Kraken Panels */
 .kraken-panel {
-  background: rgba(34, 34, 34, 0.6);
+  background: rgba(0, 0, 0, 0.6);
   border: 1px solid var(--kraken-tentacle);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
@@ -644,7 +644,7 @@ body {
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-lg) var(--space-sm);
-  background: rgba(51, 51, 51, 0.6);
+  background: rgba(0, 0, 0, 0.6);
   border: 1px solid var(--kraken-tentacle);
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -857,7 +857,7 @@ body {
 }
 
 .kraken-guide {
-  background: rgba(26, 26, 26, 0.8);
+  background: rgba(0, 0, 0, 0.8);
   border: 1px solid var(--kraken-tentacle);
   border-radius: var(--radius-lg);
   padding: var(--space-xl);
@@ -953,7 +953,7 @@ body {
 }
 
 .bot-message .message-content {
-  background: rgba(34, 34, 34, 0.8);
+  background: rgba(0, 0, 0, 0.8);
   border: 1px solid var(--kraken-tentacle);
   color: var(--text-kraken);
   padding: var(--space-xl);
@@ -1088,7 +1088,7 @@ body {
 
 /* Kraken Input Area */
 .kraken-input {
-  background: rgba(17, 17, 17, 0.95);
+  background: rgba(0, 0, 0, 0.95);
   border-top: 2px solid var(--kraken-tentacle);
   padding: var(--space-xl);
   position: relative;
@@ -1115,7 +1115,7 @@ body {
   display: flex;
   align-items: flex-end;
   gap: var(--space-md);
-  background: rgba(34, 34, 34, 0.8);
+  background: rgba(0, 0, 0, 0.8);
   border: 2px solid var(--kraken-tentacle);
   border-radius: var(--radius-xl);
   padding: var(--space-lg);
@@ -1277,7 +1277,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--kraken-abyss);
+  background: #000000;
 }
 
 ::-webkit-scrollbar-thumb {
