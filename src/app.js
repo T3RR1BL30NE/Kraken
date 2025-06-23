@@ -474,12 +474,18 @@ I'm ready to help with your coding projects. What would you like to work on?`);
     try {
       const config = this.modelConfig[modelName];
       if (!config) {
-        throw new Error(`Model ${modelName} not configured`);
+        console.warn(`Model ${modelName} not configured`);
+        return false;
       }
 
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+      
       const response = await fetch(config.endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           model: modelName,
           prompt: 'Hello, are you working?',
@@ -488,31 +494,44 @@ I'm ready to help with your coding projects. What would you like to work on?`);
         })
       });
 
+      clearTimeout(timeoutId);
       return response.ok;
     } catch (error) {
-      console.error(`Connection test failed for ${modelName}:`, error);
+      // Only log as warning instead of error to reduce console noise
+      console.warn(`Connection test failed for ${modelName}: ${error.message}`);
       return false;
     }
   }
 
   // Add connection status indicator
   async updateConnectionStatus() {
-    const models = Object.keys(this.modelConfig);
-    const statusPromises = models.map(async (model) => {
-      const isConnected = await this.testModelConnection(model);
-      return { model, isConnected };
-    });
+    try {
+      const models = Object.keys(this.modelConfig);
+      const statusPromises = models.map(async (model) => {
+        const isConnected = await this.testModelConnection(model);
+        return { model, isConnected };
+      });
 
-    const statuses = await Promise.all(statusPromises);
-    
-    // Update UI to show connection status
-    const select = document.getElementById('model-select');
-    Array.from(select.options).forEach(option => {
-      const status = statuses.find(s => s.model === option.value);
-      if (status) {
-        option.textContent = `${this.modelConfig[option.value].name} ${status.isConnected ? '🟢' : '🔴'}`;
+      const statuses = await Promise.all(statusPromises);
+      
+      // Update UI to show connection status
+      const select = document.getElementById('model-select');
+      if (select) {
+        Array.from(select.options).forEach(option => {
+          const status = statuses.find(s => s.model === option.value);
+          if (status && this.modelConfig[option.value]) {
+            option.textContent = `${this.modelConfig[option.value].name} ${status.isConnected ? '🟢' : '🔴'}`;
+          }
+        });
       }
-    });
+      
+      // Show connection summary in console
+      const connectedCount = statuses.filter(s => s.isConnected).length;
+      console.info(`Model connection status: ${connectedCount}/${statuses.length} models connected`);
+      
+    } catch (error) {
+      console.warn('Failed to update connection status:', error.message);
+    }
   }
 
   // Discover available APIs
