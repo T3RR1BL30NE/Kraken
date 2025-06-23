@@ -160,7 +160,17 @@ class CodingBot {
     // Update model info display
     this.updateModelInfo();
     
-    // File explorer expand button
+    const expandBtn = document.getElementById('expand-files');
+    if (expandBtn) {
+      expandBtn.addEventListener('click', () => {
+        this.toggleFileExplorer();
+      });
+    }
+    
+    // Initialize Kraken theme
+    this.initializeKrakenTheme();
+  }
+
   toggleFileExplorer() {
     const fileTree = document.getElementById('file-tree');
     const expandBtn = document.getElementById('expand-files');
@@ -177,17 +187,6 @@ class CodingBot {
       arrow.style.transform = 'rotate(-135deg)';
       this.addMessage('system', '📁 Code vault sealed - Files hidden in the abyss!');
     }
-  }
-  
-    const expandBtn = document.getElementById('expand-files');
-    if (expandBtn) {
-      expandBtn.addEventListener('click', () => {
-        this.toggleFileExplorer();
-      });
-    }
-    
-    // Initialize Kraken theme
-    this.initializeKrakenTheme();
   }
 
   initializeUI() {
