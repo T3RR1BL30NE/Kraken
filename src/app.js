@@ -9,6 +9,7 @@ class CodingBot {
     this.selectedModel = 'mistral7b';
     this.chatHistory = [];
     this.apiTester = new APITester();
+    this.modelConfig = MODEL_CONFIG; // Initialize with default config
     this.init();
   }
 
@@ -169,7 +170,14 @@ class CodingBot {
         codellama: 'codellama'
       };
       
+      // Use dynamic model config
+      const modelConfig = this.modelConfig[this.selectedModel];
+      if (!modelConfig) {
+        throw new Error(`Model ${this.selectedModel} not configured`);
+      }
+      
       const actualModelName = ollamaModelNames[this.selectedModel] || this.selectedModel;
+      const apiEndpoint = modelConfig.endpoint || endpoint;
 
       // Prepare the request payload
       const payload = {
@@ -184,7 +192,7 @@ class CodingBot {
       };
 
       // Make the API call
-      const response = await fetch(endpoint, {
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -464,7 +472,7 @@ I'm ready to help with your coding projects. What would you like to work on?`);
   // Test connection to local models
   async testModelConnection(modelName) {
     try {
-      const config = MODEL_CONFIG[modelName];
+      const config = this.modelConfig[modelName];
       if (!config) {
         throw new Error(`Model ${modelName} not configured`);
       }
@@ -489,7 +497,7 @@ I'm ready to help with your coding projects. What would you like to work on?`);
 
   // Add connection status indicator
   async updateConnectionStatus() {
-    const models = Object.keys(MODEL_CONFIG);
+    const models = Object.keys(this.modelConfig);
     const statusPromises = models.map(async (model) => {
       const isConnected = await this.testModelConnection(model);
       return { model, isConnected };
@@ -502,7 +510,7 @@ I'm ready to help with your coding projects. What would you like to work on?`);
     Array.from(select.options).forEach(option => {
       const status = statuses.find(s => s.model === option.value);
       if (status) {
-        option.textContent = `${MODEL_CONFIG[option.value].name} ${status.isConnected ? '🟢' : '🔴'}`;
+        option.textContent = `${this.modelConfig[option.value].name} ${status.isConnected ? '🟢' : '🔴'}`;
       }
     });
   }
@@ -527,6 +535,19 @@ I'm ready to help with your coding projects. What would you like to work on?`);
         message += 'I can update your configuration to use these endpoints. Would you like me to do that?';
         this.addMessage('bot', message);
         
+        // Update model configuration with discovered APIs
+        this.modelConfig = this.apiTester.generateConfig(workingAPIs);
+        
+        // Update the model select dropdown
+        this.updateModelSelect();
+        
+        // Set selected model to first available
+        const availableModels = Object.keys(this.modelConfig);
+        if (availableModels.length > 0) {
+          this.selectedModel = availableModels[0];
+          document.getElementById('model-select').value = this.selectedModel;
+        }
+        
         // Update API status display
         const statusDiv = document.getElementById('api-status');
         statusDiv.innerHTML = `<div class="status-success">Found ${workingAPIs.length} API(s)</div>`;
@@ -547,6 +568,19 @@ Check the console for detailed error messages.`);
     } catch (error) {
       this.addMessage('bot', `Error during API discovery: ${error.message}`);
     }
+  }
+
+  // Update model select dropdown with current model config
+  updateModelSelect() {
+    const select = document.getElementById('model-select');
+    select.innerHTML = '';
+    
+    Object.entries(this.modelConfig).forEach(([key, config]) => {
+      const option = document.createElement('option');
+      option.value = key;
+      option.textContent = config.name || key;
+      select.appendChild(option);
+    });
   }
 }
 
