@@ -385,8 +385,14 @@ class CodingBot {
         context.project
       );
       
-      // All models use Ollama on port 11434
-      const endpoint = 'http://localhost:11434/api/generate';
+      // Check if we're in a browser environment and handle CORS
+      const isElectron = window.electronAPI !== undefined;
+      const endpoint = isElectron ? 'http://localhost:11434/api/generate' : null;
+      
+      // If not in Electron and no local server available, use fallback
+      if (!endpoint) {
+        throw new Error('Local model server not available in browser environment. Please use the desktop version or ensure CORS is configured.');
+      }
       
       // Map our model names to actual Ollama model names
       const ollamaModelNames = {
@@ -421,12 +427,16 @@ class CodingBot {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        // Add timeout and error handling for network issues
+        signal: AbortSignal.timeout(30000) // 30 second timeout
       });
 
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`API request failed: ${response.status} ${response.statusText}. ${errorText}`);
       }
 
       const data = await response.json();
@@ -454,8 +464,28 @@ class CodingBot {
     } catch (error) {
       console.error('Error calling local model:', error);
       
-      // Fallback to simulated response if API fails
-      this.addMessage('system', `⚠️ Could not connect to Ollama (${this.selectedModel}). Make sure Ollama is running with: ollama serve`);
+      // Enhanced error handling with specific messages
+      let errorMessage = '';
+      
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        errorMessage = `⚠️ Network Error: Cannot connect to local Ollama server. 
+        
+🔧 **Solutions:**
+1. Make sure Ollama is running: \`ollama serve\`
+2. For browser use, consider using the desktop version
+3. Or configure CORS in Ollama with: \`OLLAMA_ORIGINS=* ollama serve\``;
+      } else if (error.name === 'AbortError') {
+        errorMessage = `⚠️ Request timeout: The model took too long to respond. Try again or use a different model.`;
+      } else {
+        errorMessage = `⚠️ Could not connect to Ollama (${this.selectedModel}). 
+        
+Error: ${error.message}
+
+Make sure Ollama is running with: \`ollama serve\`
+For browser use, try: \`OLLAMA_ORIGINS=* ollama serve\``;
+      }
+      
+      this.addMessage('system', errorMessage);
       
       const fallbackResponses = {
         mistral7b: this.getEnhancedMistralResponse(message),
@@ -463,7 +493,15 @@ class CodingBot {
         codellama: this.getEnhancedCodeLlamaResponse(message)
       };
       
-      return fallbackResponses[this.selectedModel] || `Error connecting to ${this.selectedModel}: ${error.message}`;
+      return fallbackResponses[this.selectedModel] || `🐙 **Kraken Fallback Mode Activated**
+      
+While the local model is unavailable, I'm providing enhanced responses based on your context.
+
+**Error Details:** ${error.message}
+
+**To restore full AI capabilities:**
+- Desktop version: Start Ollama with \`ollama serve\`
+- Browser version: Use \`OLLAMA_ORIGINS=* ollama serve\` to allow CORS`;
     }
   }
 
