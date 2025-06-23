@@ -165,7 +165,7 @@ ANALYSIS APPROACH:
   // Analyze project structure for better context
   analyzeProject(projectPath, fileTree) {
     const analysis = {
-      type: 'unknown',
+      type: this.detectProjectType(fileTree),
       technologies: [],
       structure: {},
       patterns: [],
@@ -174,40 +174,112 @@ ANALYSIS APPROACH:
 
     if (!fileTree) return analysis;
 
-    // Detect project type
-    const files = fileTree.map(f => f.name.toLowerCase());
-    
-    if (files.includes('package.json')) {
-      analysis.type = 'node';
-      analysis.technologies.push('Node.js');
-    }
-    
-    if (files.includes('index.html')) {
-      analysis.technologies.push('HTML');
-    }
-    
-    if (files.some(f => f.endsWith('.jsx') || f.endsWith('.tsx'))) {
-      analysis.technologies.push('React');
-    }
-    
-    if (files.some(f => f.endsWith('.vue'))) {
-      analysis.technologies.push('Vue.js');
-    }
-    
-    if (files.some(f => f.endsWith('.py'))) {
-      analysis.technologies.push('Python');
-    }
-
-    // Analyze structure patterns
-    if (files.includes('src')) {
-      analysis.patterns.push('src-based-structure');
-    }
-    
-    if (files.includes('components')) {
-      analysis.patterns.push('component-architecture');
-    }
+    analysis.technologies = this.detectTechnologies(fileTree);
+    analysis.structure = this.analyzeProjectStructure(fileTree);
+    analysis.patterns = this.detectArchitecturalPatterns(fileTree);
+    analysis.suggestions = this.generateProjectSuggestions(analysis);
 
     return analysis;
+  }
+
+  detectProjectType(fileTree) {
+    const files = fileTree.map(f => f.name.toLowerCase());
+    
+    if (files.includes('package.json') && files.some(f => f.endsWith('.jsx') || f.endsWith('.tsx'))) return 'react-app';
+    if (files.includes('package.json') && files.some(f => f.endsWith('.vue'))) return 'vue-app';
+    if (files.includes('package.json') && files.includes('angular.json')) return 'angular-app';
+    if (files.includes('package.json')) return 'node-project';
+    if (files.includes('requirements.txt') || files.includes('setup.py')) return 'python-project';
+    if (files.includes('pom.xml') || files.includes('build.gradle')) return 'java-project';
+    if (files.includes('cargo.toml')) return 'rust-project';
+    if (files.includes('go.mod')) return 'go-project';
+    if (files.includes('index.html')) return 'web-project';
+    
+    return 'unknown';
+  }
+
+  detectTechnologies(fileTree) {
+    const technologies = new Set();
+    const files = fileTree.map(f => f.name.toLowerCase());
+    
+    // Package managers and frameworks
+    if (files.includes('package.json')) technologies.add('Node.js');
+    if (files.includes('requirements.txt')) technologies.add('Python');
+    if (files.includes('composer.json')) technologies.add('PHP');
+    if (files.includes('cargo.toml')) technologies.add('Rust');
+    if (files.includes('go.mod')) technologies.add('Go');
+    
+    // Frontend frameworks
+    if (files.some(f => f.endsWith('.jsx') || f.endsWith('.tsx'))) technologies.add('React');
+    if (files.some(f => f.endsWith('.vue'))) technologies.add('Vue.js');
+    if (files.includes('angular.json')) technologies.add('Angular');
+    
+    // Build tools
+    if (files.includes('webpack.config.js')) technologies.add('Webpack');
+    if (files.includes('vite.config.js')) technologies.add('Vite');
+    if (files.includes('rollup.config.js')) technologies.add('Rollup');
+    
+    // Testing
+    if (files.includes('jest.config.js') || files.some(f => f.includes('test') || f.includes('spec'))) {
+      technologies.add('Testing');
+    }
+    
+    return Array.from(technologies);
+  }
+
+  analyzeProjectStructure(fileTree) {
+    const files = fileTree.map(f => f.name.toLowerCase());
+    
+    return {
+      hasSourceDirectory: files.includes('src'),
+      hasTestDirectory: files.some(f => f.includes('test') || f.includes('spec')),
+      hasDocumentation: files.some(f => f.includes('readme') || f.includes('doc')),
+      hasConfiguration: files.some(f => f.includes('config') || f.includes('.env')),
+      hasBuildTools: files.some(f => f.includes('webpack') || f.includes('vite') || f.includes('rollup')),
+      hasTypeScript: files.some(f => f.endsWith('.ts') || f.endsWith('.tsx')),
+      componentCount: fileTree.filter(f => 
+        f.name.toLowerCase().includes('component') || 
+        f.name.endsWith('.jsx') || 
+        f.name.endsWith('.tsx') || 
+        f.name.endsWith('.vue')
+      ).length
+    };
+  }
+
+  detectArchitecturalPatterns(fileTree) {
+    const patterns = [];
+    const files = fileTree.map(f => f.name.toLowerCase());
+    
+    if (files.includes('src') && files.includes('components')) patterns.push('component-based');
+    if (files.includes('controllers') && files.includes('models')) patterns.push('mvc');
+    if (files.includes('services') && files.includes('repositories')) patterns.push('service-repository');
+    if (files.some(f => f.includes('middleware'))) patterns.push('middleware');
+    if (files.some(f => f.includes('hook') || f.includes('hooks'))) patterns.push('hooks');
+    if (files.some(f => f.includes('store') || f.includes('redux'))) patterns.push('state-management');
+    
+    return patterns;
+  }
+
+  generateProjectSuggestions(analysis) {
+    const suggestions = [];
+    
+    if (!analysis.structure.hasTestDirectory) {
+      suggestions.push('Consider adding unit tests to improve code quality');
+    }
+    
+    if (!analysis.structure.hasDocumentation) {
+      suggestions.push('Add README.md with project documentation');
+    }
+    
+    if (analysis.technologies.includes('React') && !analysis.structure.hasTypeScript) {
+      suggestions.push('Consider migrating to TypeScript for better type safety');
+    }
+    
+    if (analysis.structure.componentCount > 10 && !analysis.patterns.includes('state-management')) {
+      suggestions.push('Consider implementing state management (Redux, Zustand, etc.)');
+    }
+    
+    return suggestions;
   }
 
   // Generate follow-up questions

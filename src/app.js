@@ -508,25 +508,29 @@ class CodingBot {
   getEnhancedMistralResponse(message) {
     const intent = this.smartPrompts.analyzeIntent(message);
     const context = this.contextManager.getRelevantContext(message);
+    const projectTech = context.project?.technologies?.join(', ') || 'JavaScript/Web';
+    const fileCount = context.project?.files?.length || 0;
     
     if (message.toLowerCase().includes('create') || message.toLowerCase().includes('build')) {
       return `🐙 **Kraken's Enhanced Creation Powers Activate!**
 
-Based on your project context (${context.project?.technologies?.join(', ') || 'analyzing...'}), here's an intelligent approach:
+Based on your project context (${projectTech}), here's an intelligent approach:
 
-\`\`\`javascript
+\`\`\`${context.project?.technologies?.includes('TypeScript') ? 'typescript' : 'javascript'}
 // Smart code generation based on your project structure
 function createEnhancedComponent() {
-  // Analyzing your codebase patterns...
-  // Applying best practices for ${context.project?.technologies?.[0] || 'your stack'}
+  // Analyzing your ${fileCount} project files...
+  // Applying best practices for ${context.project?.technologies?.[0] || projectTech}
   console.log('🧠 Intelligent code crafted with context awareness!');
 }
 \`\`\`
 
 🌊 **Smart Analysis Complete:**
-- Detected project type: ${context.project?.structure?.architecture || 'analyzing...'}
+- Project type: ${context.project?.type || 'Web Application'}
+- Technologies: ${projectTech}
+- Files analyzed: ${fileCount}
 - Recommended patterns: Modern ES6+, error handling, testing
-- Integration points: ${context.relevantFiles?.length || 0} related files found
+- Related files: ${context.relevantFiles?.length || 0} found
 
 Would you like me to:
 - Add comprehensive error handling?
@@ -538,10 +542,10 @@ Would you like me to:
       return `🔱 **Kraken's Advanced Debugging System Engaged!**
 
 🔍 **Intelligent Problem Analysis:**
-Based on your project context and common patterns, here's a systematic approach:
+Based on your ${projectTech} project with ${fileCount} files, here's a systematic approach:
 
-1. **🧠 Context Analysis** - Examining ${context.project?.files?.length || 0} project files
-2. **🔍 Pattern Recognition** - Checking for common issues in ${context.project?.technologies?.join(', ') || 'your stack'}
+1. **🧠 Context Analysis** - Examining ${fileCount} project files
+2. **🔍 Pattern Recognition** - Checking for common issues in ${projectTech}
 3. **⚡ Smart Diagnostics** - AI-powered error detection
 4. **🛠️ Targeted Solutions** - Context-aware fixes
 5. **🏗️ Prevention Strategy** - Long-term code health
@@ -555,10 +559,17 @@ Ready to dive deeper into the specific issue?`;
 
 Your query: *"${message}"*
 
+📊 **Project Overview:**
+- Type: ${context.project?.type || 'Web Application'}
+- Technologies: ${projectTech}
+- Files: ${fileCount} in scope
+- Architecture: ${context.project?.patterns?.join(', ') || 'Standard structure'}
+
 🧠 **Smart Context Analysis:**
-- Project: ${context.project?.technologies?.join(' + ') || 'Analyzing your codebase...'}
-- Files: ${context.project?.files?.length || 0} files in scope
-- Architecture: ${context.project?.structure?.architecture || 'Detecting patterns...'}
+- Has tests: ${context.project?.structure?.hasTestDirectory ? '✅ Yes' : '❌ No'}
+- Has docs: ${context.project?.structure?.hasDocumentation ? '✅ Yes' : '❌ No'}
+- TypeScript: ${context.project?.structure?.hasTypeScript ? '✅ Yes' : '❌ No'}
+- Build tools: ${context.project?.structure?.hasBuildTools ? '✅ Yes' : '❌ No'}
 
 ⚡ **Enhanced Capabilities Ready:**
 - 🧠 **Context-Aware Solutions** - Tailored to your specific project
@@ -571,16 +582,19 @@ What specific challenge shall the enhanced Kraken tackle for you?`;
 
   getEnhancedStarCoderResponse(message) {
     const context = this.contextManager.getRelevantContext(message);
+    const projectTech = context.project?.technologies?.join(', ') || 'JavaScript';
+    const isTypeScript = context.project?.technologies?.includes('TypeScript');
+    const fileCount = context.project?.files?.length || 0;
     
     if (message.toLowerCase().includes('function') || message.toLowerCase().includes('class')) {
       return `🐙 **Enhanced Kraken StarCoder - AI Code Architect!**
 
 🧠 **Intelligent Code Generation Based on Your Project:**
 
-\`\`\`${context.project?.technologies?.includes('TypeScript') ? 'typescript' : 'javascript'}
+\`\`\`${isTypeScript ? 'typescript' : 'javascript'}
 // Smart code crafted with project context awareness
-// Detected stack: ${context.project?.technologies?.join(', ') || 'Modern JavaScript'}
-${context.project?.technologies?.includes('TypeScript') ? 
+// Detected stack: ${projectTech}
+${isTypeScript ? 
 `interface SmartComponentProps {
   // Auto-generated based on your project patterns
   data: any;
@@ -611,10 +625,11 @@ function createSmartComponent(props: SmartComponentProps) {` :
 \`\`\`
 
 🚀 **AI Enhancements Applied:**
-- **Context Integration**: Matches your project's ${context.project?.structure?.architecture || 'architecture'}
-- **Smart Typing**: ${context.project?.technologies?.includes('TypeScript') ? 'TypeScript support detected' : 'JavaScript with JSDoc'}
+- **Context Integration**: Matches your ${context.project?.type || 'project'} architecture
+- **Smart Typing**: ${isTypeScript ? 'TypeScript support detected' : 'JavaScript with JSDoc'}
 - **Error Handling**: Production-ready error management
-- **Best Practices**: Following ${context.project?.technologies?.join(' + ') || 'modern'} conventions
+- **Best Practices**: Following ${projectTech} conventions
+- **File Analysis**: Based on ${fileCount} project files
 
 Want me to add tests, documentation, or optimize further?`;
     }
@@ -623,10 +638,16 @@ Want me to add tests, documentation, or optimize further?`;
 
 Your request: *"${message}"*
 
+📁 **Project Intelligence:**
+- Stack: ${projectTech}
+- Files: ${fileCount} analyzed
+- Structure: ${context.project?.patterns?.join(', ') || 'Standard'}
+- Quality: ${context.project?.structure?.hasTestDirectory ? '🟢 High (tests present)' : '🟡 Medium (consider tests)'}
+
 🧠 **Project Intelligence Active:**
-- Codebase: ${context.project?.files?.length || 0} files analyzed
-- Tech Stack: ${context.project?.technologies?.join(', ') || 'Detecting...'}
-- Patterns: ${context.project?.structure?.hasTests ? '✅ Tests found' : '⚠️ Consider adding tests'}
+- TypeScript: ${context.project?.structure?.hasTypeScript ? '✅ Enabled' : '❌ Consider migration'}
+- Documentation: ${context.project?.structure?.hasDocumentation ? '✅ Present' : '⚠️ Needs improvement'}
+- Build Tools: ${context.project?.structure?.hasBuildTools ? '✅ Configured' : '⚠️ Consider setup'}
 
 ⚡ **Enhanced StarCoder Powers:**
 - 🎯 **Smart Code Generation** - Context-aware, production-ready code
@@ -639,15 +660,19 @@ Ready to create something amazing together?`;
 
   getEnhancedCodeLlamaResponse(message) {
     const context = this.contextManager.getRelevantContext(message);
+    const projectTech = context.project?.technologies?.join(' + ') || 'Multi-language';
+    const fileCount = context.project?.files?.length || 0;
+    const isPython = context.project?.technologies?.includes('Python');
+    const complexity = fileCount > 50 ? 'Enterprise-scale' : fileCount > 20 ? 'Medium-scale' : 'Standard project';
     
     if (message.toLowerCase().includes('algorithm') || message.toLowerCase().includes('optimize')) {
       return `🐙 **Enhanced Kraken CodeLlama - Algorithm Intelligence!**
 
 🧠 **Advanced Algorithmic Analysis:**
-Project Context: ${context.project?.technologies?.join(' + ') || 'Multi-language environment'}
+Project Context: ${projectTech} (${fileCount} files)
 
-\`\`\`${context.project?.technologies?.includes('Python') ? 'python' : 'javascript'}
-${context.project?.technologies?.includes('Python') ? 
+\`\`\`${isPython ? 'python' : 'javascript'}
+${isPython ? 
 `# AI-optimized algorithm with context awareness
 def enhanced_algorithm(data, context=None):
     """
@@ -708,11 +733,12 @@ function enhancedAlgorithm(data, options = {}) {
 - **Smart Complexity Analysis**: Automatically optimized for your data size
 - **Context-Aware Processing**: Adapts to your specific use patterns  
 - **Intelligent Error Handling**: Production-ready resilience
-- **Performance Monitoring**: Built-in optimization tracking
+- **Performance Monitoring**: Built-in optimization tracking for ${complexity}
 
 📊 **Performance Insights:**
 - Estimated improvement: 40-60% faster than basic implementation
-- Memory usage: Optimized for ${context.project?.structure?.architecture || 'your architecture'}
+- Memory usage: Optimized for ${complexity} applications
+- Technology fit: Tailored for ${projectTech}
 - Scalability: Ready for production workloads
 
 Want me to add performance benchmarks or explain the optimization strategy?`;
@@ -722,11 +748,17 @@ Want me to add performance benchmarks or explain the optimization strategy?`;
 
 Your challenge: *"${message}"*
 
+🏗️ **Project Architecture Analysis:**
+- Scale: ${complexity} (${fileCount} files)
+- Technologies: ${projectTech}
+- Patterns: ${context.project?.patterns?.join(', ') || 'Standard architecture'}
+- Quality Score: ${context.project?.structure?.hasTestDirectory ? '🟢 High' : '🟡 Medium'}
+
 🧠 **Advanced Project Analysis:**
-- Architecture: ${context.project?.structure?.architecture || 'Analyzing patterns...'}
-- Complexity: ${context.project?.files?.length > 50 ? 'Enterprise-scale' : 'Standard project'}
-- Technologies: ${context.project?.technologies?.join(' + ') || 'Multi-stack environment'}
-- Quality Score: ${context.project?.structure?.hasTests ? '🟢 High (tests present)' : '🟡 Medium (consider adding tests)'}
+- Build System: ${context.project?.structure?.hasBuildTools ? '✅ Modern' : '⚠️ Needs setup'}
+- Type Safety: ${context.project?.structure?.hasTypeScript ? '✅ TypeScript' : '⚠️ Consider TypeScript'}
+- Documentation: ${context.project?.structure?.hasDocumentation ? '✅ Well documented' : '⚠️ Needs docs'}
+- Testing: ${context.project?.structure?.hasTestDirectory ? '✅ Test coverage' : '⚠️ Add tests'}
 
 ⚡ **Enhanced CodeLlama Capabilities:**
 - 🧠 **Algorithm Intelligence** - Context-aware optimization strategies

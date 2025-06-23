@@ -216,26 +216,60 @@ export class SmartContextManager {
 
   getUserPatterns() {
     // Analyze user's coding patterns and preferences
+    const languages = this.conversationMemory
+      .map(m => this.detectLanguageFromMessage(m.userMessage))
+      .filter(Boolean);
+    
+    const mostUsedLanguage = this.getMostFrequentItem(languages) || 'JavaScript';
+    
     return {
-      preferredLanguage: this.getMostUsedLanguage(),
-      complexity: this.getPreferredComplexity(),
-      style: this.getPreferredStyle()
+      preferredLanguage: mostUsedLanguage,
+      complexity: this.analyzeComplexityPreference(),
+      style: this.analyzeStylePreference()
     };
   }
 
-  getMostUsedLanguage() {
-    // Analyze conversation history to determine preferred language
-    return 'JavaScript'; // Placeholder
+  detectLanguageFromMessage(message) {
+    const lowerMessage = message.toLowerCase();
+    if (lowerMessage.includes('python') || lowerMessage.includes('.py')) return 'Python';
+    if (lowerMessage.includes('javascript') || lowerMessage.includes('.js')) return 'JavaScript';
+    if (lowerMessage.includes('typescript') || lowerMessage.includes('.ts')) return 'TypeScript';
+    if (lowerMessage.includes('java') && !lowerMessage.includes('javascript')) return 'Java';
+    if (lowerMessage.includes('react') || lowerMessage.includes('jsx')) return 'React';
+    if (lowerMessage.includes('vue')) return 'Vue';
+    if (lowerMessage.includes('angular')) return 'Angular';
+    return null;
   }
 
-  getPreferredComplexity() {
-    // Analyze if user prefers simple or detailed explanations
-    return 'detailed'; // Placeholder
+  getMostFrequentItem(items) {
+    if (items.length === 0) return null;
+    const frequency = {};
+    items.forEach(item => frequency[item] = (frequency[item] || 0) + 1);
+    return Object.keys(frequency).reduce((a, b) => frequency[a] > frequency[b] ? a : b);
   }
 
-  getPreferredStyle() {
-    // Analyze user's preferred coding style
-    return 'modern'; // Placeholder
+  analyzeComplexityPreference() {
+    const recentMessages = this.conversationMemory.slice(-10);
+    const complexityIndicators = recentMessages.filter(m => 
+      m.userMessage.toLowerCase().includes('explain') ||
+      m.userMessage.toLowerCase().includes('detail') ||
+      m.userMessage.toLowerCase().includes('how') ||
+      m.userMessage.toLowerCase().includes('why')
+    );
+    
+    return complexityIndicators.length > 3 ? 'detailed' : 'concise';
+  }
+
+  analyzeStylePreference() {
+    const recentMessages = this.conversationMemory.slice(-10);
+    const modernIndicators = recentMessages.filter(m => 
+      m.userMessage.toLowerCase().includes('modern') ||
+      m.userMessage.toLowerCase().includes('es6') ||
+      m.userMessage.toLowerCase().includes('async') ||
+      m.userMessage.toLowerCase().includes('arrow function')
+    );
+    
+    return modernIndicators.length > 0 ? 'modern' : 'traditional';
   }
 
   addToMemory(interaction) {
