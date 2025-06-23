@@ -8,7 +8,7 @@ export class KrakenLogoManager {
   }
 
   init() {
-    this.logoElement = document.querySelector('.kraken-logo-temp');
+    this.logoElement = document.querySelector('.kraken-logo');
     this.setupLogoEffects();
   }
 

@@ -151,6 +151,20 @@ body {
   object-fit: cover;
 }
 
+.kraken-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: cover;
+  filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.6));
+  transition: all 0.3s ease;
+}
+
+.kraken-logo:hover {
+  filter: drop-shadow(0 0 15px rgba(0, 212, 255, 0.8)) brightness(1.2);
+  transform: scale(1.05);
+}
+
 .logo-icon::before {
   content: '';
   position: absolute;
